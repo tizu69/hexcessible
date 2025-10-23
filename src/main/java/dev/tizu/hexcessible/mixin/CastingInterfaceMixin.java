@@ -18,25 +18,25 @@ public class CastingInterfaceMixin {
 
     @Inject(at = @At(value = "INVOKE", target = "play", shift = At.Shift.BEFORE), method = "drawStart", remap = false)
     private void drawStart(double mxOut, double myOut, CallbackInfoReturnable<Boolean> info) {
-        HexcessibleState.shouldPresent = true;
+        HexcessibleState.setShouldPresent(true);
     }
 
     @Inject(at = @At("HEAD"), method = "mouseMoved", remap = false)
     private void mouseMoved(CallbackInfo info) {
-        if (!HexcessibleState.shouldPresent)
+        if (!HexcessibleState.getShouldPresent())
             return;
-        HexcessibleState.shouldPresent = false;
+        HexcessibleState.setShouldPresent(false);
     }
 
     @Inject(at = @At("RETURN"), method = "render", remap = false)
     private void render(DrawContext ctx, int mouseX, int mouseY, float delta,
             CallbackInfo info) {
-        if (!HexcessibleState.shouldPresent)
+        if (!HexcessibleState.getShouldPresent())
             return;
         var tr = MinecraftClient.getInstance().textRenderer;
 
-        var text = !HexcessibleState.query.equals("")
-                ? Text.literal(HexcessibleState.query)
+        var text = !HexcessibleState.getQuery().equals("")
+                ? Text.literal(HexcessibleState.getQuery())
                 : Text.translatable("hexcessible.start_typing")
                         .formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
         ctx.drawTooltip(tr, text, mouseX, mouseY);
