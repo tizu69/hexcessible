@@ -1,0 +1,32 @@
+{
+    "schemaVersion": 1,
+    "id": "hexcessible",
+    "version": "${version}",
+    "name": "Hexcessible",
+    "description": "Hex Casting for the lazy.",
+    "authors": ["Ruby (tizu)"],
+    "contact": {
+        "sources": "https://g.tizu.dev/hexcessible"
+    },
+    "license": "The JSON License",
+    "icon": "assets/hexcessible/icon.png",
+    "environment": "client",
+    "entrypoints": {
+        "main": [],
+        "client": ["dev.tizu.hexcessible.Hexcessible"]
+    },
+    "mixins": [
+        {
+            "config": "hexcessible.mixins.json",
+            "environment": "client"
+        }
+    ],
+    "depends": {
+        "fabricloader": ">=0.17.3",
+        "minecraft": "~1.20.1",
+        "java": ">=17",
+        "fabric-api": "*",
+        "hexcasting": "*"
+    },
+    "suggests": {}
+}
