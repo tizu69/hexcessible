@@ -18,16 +18,8 @@ public class CastingInterfaceMixin {
         shouldPresent = true;
     }
 
-    @Inject(at = @At("HEAD"), method = "drawMove", remap = false)
-    private void drawMove(double mxOut, double myOut, CallbackInfoReturnable<Boolean> info) {
-        if (!shouldPresent)
-            return;
-        Hexcessible.LOGGER.info("Done presenting interface (moved)");
-        shouldPresent = false;
-    }
-
-    @Inject(at = @At("HEAD"), method = "drawEnd", remap = false)
-    private void drawEnd(CallbackInfoReturnable<Boolean> info) {
+    @Inject(at = @At("HEAD"), method = "mouseMoved", remap = false)
+    private void mouseMoved(CallbackInfo info) {
         if (!shouldPresent)
             return;
         Hexcessible.LOGGER.info("Done presenting interface");
