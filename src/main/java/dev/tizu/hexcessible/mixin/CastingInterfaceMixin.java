@@ -12,7 +12,7 @@ import dev.tizu.hexcessible.Hexcessible;
 public class CastingInterfaceMixin {
     private boolean shouldPresent = false;
 
-    @Inject(at = @At("HEAD"), method = "drawStart", remap = false)
+    @Inject(at = @At(value = "INVOKE", target = "play", shift = At.Shift.BEFORE), method = "drawStart", remap = false)
     private void drawStart(double mxOut, double myOut, CallbackInfoReturnable<Boolean> info) {
         Hexcessible.LOGGER.info("Now presenting interface");
         shouldPresent = true;
