@@ -1,7 +1,10 @@
 package dev.tizu.hexcessible.mixin;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,7 +17,8 @@ import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import dev.tizu.hexcessible.HexcessibleState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -40,11 +44,32 @@ public class CastingInterfaceMixin {
             return;
         var tr = MinecraftClient.getInstance().textRenderer;
 
-        var text = !HexcessibleState.getQuery().equals("")
+        var tInput = !HexcessibleState.getQuery().equals("")
                 ? Text.literal(HexcessibleState.getQuery())
                 : Text.translatable("hexcessible.start_typing")
                         .formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
-        ctx.drawTooltip(tr, text, mouseX, mouseY);
+        ctx.drawTooltip(tr, tInput, mouseX, mouseY);
+
+        String[] opts = { "foo", "bar", "baz", "qux" };
+        var tooltipW = new AtomicInteger(0);
+        List<Text> options = IntStream.range(0, opts.length)
+                .mapToObj(i -> {
+                    var picked = (i == HexcessibleState.getChosen());
+                    var prefix = picked ? "> " : "";
+                    var fmt = picked ? Formatting.BLUE : Formatting.GRAY;
+                    var text = prefix + opts[i] + " " + (i + 1);
+                    tooltipW.set(Math.max(tooltipW.get(), tr.getWidth(text)));
+                    return Text.literal(text).formatted(fmt);
+                })
+                .collect(Collectors.toList());
+
+        ctx.drawTooltip(tr, options, mouseX, mouseY + 17);
+
+        var description = "num, num -> num\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam id est scelerisque, congue ex at, ultricies est. Aliquam tortor nibh, bibendum nec lobortis eget, blandit eu dui. Nunc fermentum sapien id felis ullamcorper, non rutrum purus faucibus. Sed fringilla, sapien non bibendum scelerisque, justo ante auctor purus, non elementum sem nulla sed ipsum.";
+        List<OrderedText> descLines = tr.wrapLines(Text.literal(description)
+                .formatted(Formatting.GRAY), 150);
+        var ttp = HoveredTooltipPositioner.INSTANCE;
+        ctx.drawTooltip(tr, descLines, ttp, mouseX + tooltipW.get() + 9, mouseY + 17);
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
@@ -67,10 +92,17 @@ public class CastingInterfaceMixin {
                 if (HexcessibleState.getShouldPresent())
                     HexcessibleState.setShouldPresent(false);
                 else
+                    // fall back to normal behavior
                     ((GuiSpellcasting) (Object) this).close();
                 break;
             case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB:
-                // TODO: submit spellcasting query
+                // TODO: accept chosen option
+                break;
+            case GLFW.GLFW_KEY_UP:
+                HexcessibleState.setChosen(HexcessibleState.getChosen() - 1);
+                break;
+            case GLFW.GLFW_KEY_DOWN:
+                HexcessibleState.setChosen(HexcessibleState.getChosen() + 1);
                 break;
             default:
                 return false;
