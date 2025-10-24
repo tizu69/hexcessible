@@ -2,7 +2,6 @@ package dev.tizu.hexcessible.mixin;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -50,26 +49,39 @@ public class CastingInterfaceMixin {
                         .formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
         ctx.drawTooltip(tr, tInput, mouseX, mouseY);
 
-        String[] opts = { "foo", "bar", "baz", "qux" };
-        var tooltipW = new AtomicInteger(0);
+        String[] opts = { "Akasha's Distillation", "Akasha's Gambit", "foo", "bar" };
         List<Text> options = IntStream.range(0, opts.length)
                 .mapToObj(i -> {
                     var picked = (i == HexcessibleState.getChosen());
-                    var prefix = picked ? "> " : "";
+                    var prefix = picked ? "> " : "| ";
                     var fmt = picked ? Formatting.BLUE : Formatting.GRAY;
-                    var text = prefix + opts[i] + " " + (i + 1);
-                    tooltipW.set(Math.max(tooltipW.get(), tr.getWidth(text)));
+                    var text = prefix + opts[i];
                     return Text.literal(text).formatted(fmt);
                 })
                 .collect(Collectors.toList());
 
-        ctx.drawTooltip(tr, options, mouseX, mouseY + 17);
+        var desc = "Read the iota associated with the given pattern out of the Akashic Library with its Record at the given position. This has no range limit. Costs about one Amethyst Dust.";
+        var description = Text.literal("vector, pattern -> any").formatted(Formatting.GRAY)
+                .append(Text.literal("\n" + desc).formatted(Formatting.DARK_GRAY));
+        List<OrderedText> descLines = tr.wrapLines(description, 170);
 
-        var description = "num, num -> num\n\nLorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam id est scelerisque, congue ex at, ultricies est. Aliquam tortor nibh, bibendum nec lobortis eget, blandit eu dui. Nunc fermentum sapien id felis ullamcorper, non rutrum purus faucibus. Sed fringilla, sapien non bibendum scelerisque, justo ante auctor purus, non elementum sem nulla sed ipsum.";
-        List<OrderedText> descLines = tr.wrapLines(Text.literal(description)
-                .formatted(Formatting.GRAY), 150);
-        var ttp = HoveredTooltipPositioner.INSTANCE;
-        ctx.drawTooltip(tr, descLines, ttp, mouseX + tooltipW.get() + 9, mouseY + 17);
+        var descH = descLines.size() * (tr.fontHeight + 1);
+        var descW = descLines.stream().mapToInt(tr::getWidth).max().orElse(0);
+        var optsH = options.size() * (tr.fontHeight + 1);
+        var optsW = options.stream().mapToInt(tr::getWidth).max().orElse(0);
+        var renderAbove = ctx.getScaledWindowHeight() - mouseY < Math.max(descH, optsH) + 15;
+        var descLeft = ctx.getScaledWindowWidth() - mouseX - optsW < descW + 30;
+        var fontH = tr.fontHeight + 1;
+
+        var optionsX = mouseX + optsW + 20 > ctx.getScaledWindowWidth()
+                ? ctx.getScaledWindowWidth() - optsW - 20
+                : mouseX;
+        var optionsY = renderAbove ? mouseY - (options.size() * fontH) - 9 : mouseY + 17;
+        ctx.drawTooltip(tr, options, optionsX, optionsY);
+
+        var descriptionY = renderAbove ? mouseY - (descLines.size() * fontH) - 9 : mouseY + 17;
+        var descriptionX = descLeft ? optionsX - descW - 9 : optionsX + optsW + 9;
+        ctx.drawTooltip(tr, descLines, HoveredTooltipPositioner.INSTANCE, descriptionX, descriptionY);
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
