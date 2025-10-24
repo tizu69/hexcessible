@@ -22,11 +22,12 @@ public class AutocompleteProvider {
     private String query = "";
     private int chosen = 0;
     private int chosenDoc = 0;
+    private List<AutocompleteOptions.Entry> opts;
 
     public static final AutocompleteProvider INSTANCE = new AutocompleteProvider();
 
     private AutocompleteProvider() {
-        AutocompleteOptions.INSTANCE.toString(); // force initialization
+        opts = AutocompleteOptions.INSTANCE.get();
     }
 
     public void startPresenting(int mx, int my) {
@@ -35,12 +36,11 @@ public class AutocompleteProvider {
 
     public void stopPresenting() {
         presentAt = null;
-        query = "";
-        chosen = 0;
+        setQuery("");
     }
 
     public void onCharType(char chr) {
-        query += chr;
+        setQuery(query + chr);
     }
 
     public boolean onKeyPress(int keyCode, int modifiers, Runnable onClose) {
@@ -49,11 +49,12 @@ public class AutocompleteProvider {
             case GLFW.GLFW_KEY_BACKSPACE:
                 if (ctrl) { // remove last word
                     var words = query.split(" ");
-                    query = Arrays.stream(words)
+                    setQuery(Arrays.stream(words)
                             .limit(words.length - 1l)
-                            .collect(Collectors.joining(" "));
+                            .collect(Collectors.joining(" ")));
                 } else { // remove single character
-                    query = query.isEmpty() ? "" : query.substring(0, query.length() - 1);
+                    setQuery(query.isEmpty() ? ""
+                            : query.substring(0, query.length() - 1));
                 }
                 break;
             case GLFW.GLFW_KEY_ESCAPE:
@@ -83,14 +84,21 @@ public class AutocompleteProvider {
         return true;
     }
 
+    private void setQuery(String query) {
+        this.query = query;
+        opts = AutocompleteOptions.INSTANCE.get(query);
+        chosen = 0;
+        chosenDoc = 0;
+    }
+
     private void offsetChosen(int by) {
-        var size = 4;
-        chosen = (chosen + by % size) % size;
+        var size = AutocompleteOptions.INSTANCE.get(query).size();
+        chosen = ((chosen + by) % size + size) % size;
     }
 
     private void offsetChosenDoc(int by) {
         var size = 4;
-        chosenDoc = (chosenDoc + by % size) % size;
+        chosenDoc = ((chosenDoc + by) % size + size) % size;
     }
 
     public void onRender(DrawContext ctx, int mx, int my) {
