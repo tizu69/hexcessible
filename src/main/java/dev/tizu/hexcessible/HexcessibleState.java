@@ -31,6 +31,6 @@ public class HexcessibleState {
 
     public static void setChosen(int value) {
         // TODO: once we store actual options, clamp based on their count
-        chosen = Math.min(Math.max(value, 0), 3);
+        chosen = (value % 4 + 4) % 4;
     }
 }
