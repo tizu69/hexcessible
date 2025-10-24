@@ -39,6 +39,10 @@ dependencies {
 	modLocalRuntime "vazkii.patchouli:Patchouli:$minecraft_version-$patchouli_version-FABRIC"
 	modLocalRuntime "at.petra-k.paucal:paucal-fabric-$minecraft_version:$paucal_version"
 	modLocalRuntime files("${rootProject.rootDir}/libs/serialization-hooks-0.4.99999.jar")
+
+    // HexDebug: The Splicing Table offers a casting interface which we should also account for.
+    // If you wish not to test this in your development environment, you can remove this line.
+    modLocalRuntime "gay.object.hexdebug:hexdebug-fabric:$hexdebug_version+$minecraft_version"
 }
 
 processResources {
