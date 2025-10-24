@@ -1,4 +1,4 @@
-package dev.tizu.hexcessible;
+package dev.tizu.hexcessible.autocomplete;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +7,7 @@ import java.util.Map;
 import at.petrak.hexcasting.api.HexAPI;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
+import dev.tizu.hexcessible.Utils;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -21,8 +22,6 @@ public class AutocompleteOptions {
 
     public void reindex() {
         IXplatAbstractions.INSTANCE.getActionRegistry().getKeys().forEach(key -> {
-            Hexcessible.LOGGER.info("Indexing action: {} -> {}",
-                    key, HexAPI.instance().getActionI18nKey(key));
             var item = IXplatAbstractions.INSTANCE.getActionRegistry().get(key);
 
             var id = key.getValue();

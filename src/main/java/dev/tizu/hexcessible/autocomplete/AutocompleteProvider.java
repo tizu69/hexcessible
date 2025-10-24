@@ -1,4 +1,4 @@
-package dev.tizu.hexcessible;
+package dev.tizu.hexcessible.autocomplete;
 
 import java.util.Arrays;
 import java.util.List;
