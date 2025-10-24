@@ -108,18 +108,21 @@ public class AutocompleteProvider {
 
         var tInput = !query.equals("")
                 ? Text.literal(query)
+                        .append(Text.literal(" " + opts.size())
+                                .formatted(Formatting.DARK_GRAY))
                 : Text.translatable("hexcessible.start_typing")
                         .formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
         ctx.drawTooltip(tr, tInput, mx, my);
 
-        var opts = AutocompleteOptions.INSTANCE.get(query);
-        List<Text> options = IntStream.range(0, opts.size() > 7 ? 7 : opts.size())
+        if (opts.isEmpty())
+            return;
+        var optsStart = Math.max(0, Math.min(chosen - 2, opts.size() - 7));
+        var optsEnd = Math.min(opts.size(), optsStart + 7);
+        List<Text> options = IntStream.range(optsStart, optsEnd)
                 .mapToObj(i -> {
                     var picked = i == chosen;
-                    var prefix = picked ? "> " : "| ";
                     var fmt = picked ? Formatting.BLUE : Formatting.GRAY;
-                    var text = prefix
-                            + "<" + opts.get(i).dir() + "," + opts.get(i).sig() + "> "
+                    var text = "<" + opts.get(i).dir() + "," + opts.get(i).sig() + "> "
                             + opts.get(i).name();
                     return Text.literal(text).formatted(fmt);
                 })
