@@ -97,7 +97,7 @@ public class AutocompleteProvider {
     }
 
     private void offsetChosenDoc(int by) {
-        var size = 4;
+        var size = opts.get(chosen).impls().size();
         chosenDoc = ((chosenDoc + by) % size + size) % size;
     }
 
