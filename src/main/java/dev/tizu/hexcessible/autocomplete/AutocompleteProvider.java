@@ -146,7 +146,8 @@ public class AutocompleteProvider {
         var opt = opts.get(chosen);
 
         if (chosenDoc >= opt.impls().size())
-            return List.of(Text.literal("[0/0]").formatted(Formatting.DARK_GRAY)
+            return List.of(Text.literal("[0/0] ").formatted(Formatting.DARK_GRAY)
+                    .append(Text.translatable("hexcessible.no_docs"))
                     .asOrderedText());
 
         var docN = "[" + (chosenDoc + 1) + "/" + opt.impls().size() + "]";
