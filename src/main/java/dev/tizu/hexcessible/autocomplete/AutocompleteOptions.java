@@ -29,7 +29,7 @@ public class AutocompleteOptions {
             var dir = item.prototype().component1();
             var sig = item.prototype().anglesSignature();
 
-            var numImpls = Math.random() * 5;
+            var numImpls = (int) (Math.random() * 5);
             var impls = new ArrayList<EntryImpl>();
             for (int i = 0; i < numImpls; i++)
                 impls.add(new EntryImpl("mod" + i, "desc" + i, "in" + i, "out" + i));
