@@ -146,9 +146,7 @@ public class AutocompleteProvider {
         var opt = opts.get(chosen);
 
         if (chosenDoc >= opt.impls().size())
-            return List.of(Text.literal("[0/0] ").formatted(Formatting.DARK_GRAY)
-                    .append(Text.translatable("hexcessible.no_docs"))
-                    .asOrderedText());
+            return List.of();
 
         var docN = "[" + (chosenDoc + 1) + "/" + opt.impls().size() + "]";
         var impl = opt.impls().get(chosenDoc);
@@ -180,6 +178,8 @@ public class AutocompleteProvider {
         var optionsY = renderAbove ? my - (options.size() * fontH) - 9 : my + 17;
         ctx.drawTooltip(tr, options, optionsX, optionsY);
 
+        if (descLines.isEmpty())
+            return;
         var descriptionY = renderAbove ? my - (descLines.size() * fontH) - 9 : my + 17;
         var descriptionX = descLeft ? optionsX - descW - 9 : optionsX + optsW + 9;
         ctx.drawTooltip(tr, descLines, HoveredTooltipPositioner.INSTANCE, descriptionX, descriptionY);
