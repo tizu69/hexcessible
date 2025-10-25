@@ -36,7 +36,7 @@ dependencies {
 	modLocalRuntime "dev.onyxstudios.cardinal-components-api:cardinal-components-api:$cardinal_components_version"
 	modLocalRuntime "me.shedaniel.cloth:cloth-config-fabric:$cloth_config_version"
 	modLocalRuntime "com.samsthenerd.inline:inline-fabric:$minecraft_version-$inline_version"
-	modLocalRuntime "vazkii.patchouli:Patchouli:$minecraft_version-$patchouli_version-FABRIC"
+	modImplementation "vazkii.patchouli:Patchouli:$minecraft_version-$patchouli_version-FABRIC"
 	modLocalRuntime "at.petra-k.paucal:paucal-fabric-$minecraft_version:$paucal_version"
 	modLocalRuntime files("${rootProject.rootDir}/libs/serialization-hooks-0.4.99999.jar")
 
