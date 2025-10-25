@@ -1,4 +1,4 @@
-package dev.tizu.hexcessible.autocomplete;
+package dev.tizu.hexcessible;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,17 +8,15 @@ import java.util.function.Supplier;
 import at.petrak.hexcasting.api.HexAPI;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
-import dev.tizu.hexcessible.BookEntries;
-import dev.tizu.hexcessible.Utils;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class AutocompleteOptions {
-    public static final AutocompleteOptions INSTANCE = new AutocompleteOptions();
+public class PatternEntries {
+    public static final PatternEntries INSTANCE = new PatternEntries();
 
     private List<Entry> entries = new ArrayList<>();
 
-    private AutocompleteOptions() {
+    private PatternEntries() {
         reindex();
     }
 
@@ -40,12 +38,26 @@ public class AutocompleteOptions {
         return entries;
     }
 
-    /** Fuzzy-filtered search */
+    /** Fuzzy-filtered search (for autocomplete) */
     public List<Entry> get(String query) {
         if (query == null || query.isEmpty())
             return get();
+
         return entries.stream()
-                .map(e -> Map.entry(e, Utils.fuzzyScore(query, e.name)))
+                .map(e -> {
+                    var score = 0;
+                    score += Utils.fuzzyScore(query, e.name) * 3; // important!
+                    score += Utils.fuzzyScore(query, e.id.toString());
+                    /*
+                     * score += Utils.fuzzyScore(query, e.sig) * 2;
+                     * for (var impl : e.impls) {
+                     * score += Utils.fuzzyScore(query, impl.desc());
+                     * score += Utils.fuzzyScore(query, impl.in());
+                     * score += Utils.fuzzyScore(query, impl.out());
+                     * }
+                     */
+                    return Map.entry(e, score);
+                })
                 .filter(e -> e.getValue() > 0)
                 .sorted((a, b) -> b.getValue() - a.getValue())
                 .map(Map.Entry::getKey)

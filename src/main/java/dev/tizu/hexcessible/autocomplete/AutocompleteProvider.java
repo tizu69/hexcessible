@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.lwjgl.glfw.GLFW;
 
+import dev.tizu.hexcessible.PatternEntries;
 import dev.tizu.hexcessible.BookEntries;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -24,13 +25,13 @@ public class AutocompleteProvider {
     private String query = "";
     private int chosen = 0;
     private int chosenDoc = 0;
-    private List<AutocompleteOptions.Entry> opts;
-    private List<AutocompleteOptions.Entry> optsWithLocked;
+    private List<PatternEntries.Entry> opts;
+    private List<PatternEntries.Entry> optsWithLocked;
 
     public static final AutocompleteProvider INSTANCE = new AutocompleteProvider();
 
     private AutocompleteProvider() {
-        optsWithLocked = AutocompleteOptions.INSTANCE.get();
+        optsWithLocked = PatternEntries.INSTANCE.get();
         opts = new ArrayList<>(optsWithLocked);
         opts.removeIf(e -> e.locked());
     }
@@ -91,9 +92,9 @@ public class AutocompleteProvider {
 
     private void setQuery(String query) {
         this.query = query;
-        optsWithLocked = AutocompleteOptions.INSTANCE.get(query);
+        optsWithLocked = PatternEntries.INSTANCE.get(query);
         opts = new ArrayList<>(optsWithLocked);
-        opts.removeIf(AutocompleteOptions.Entry::locked);
+        opts.removeIf(PatternEntries.Entry::locked);
         chosen = 0;
         chosenDoc = 0;
     }
