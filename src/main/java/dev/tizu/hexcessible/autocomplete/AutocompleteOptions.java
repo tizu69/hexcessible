@@ -7,6 +7,7 @@ import java.util.Map;
 import at.petrak.hexcasting.api.HexAPI;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
+import dev.tizu.hexcessible.BookEntries;
 import dev.tizu.hexcessible.Utils;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -28,12 +29,7 @@ public class AutocompleteOptions {
             var name = Text.translatable(HexAPI.instance().getActionI18nKey(key)).getString();
             var dir = item.prototype().component1();
             var sig = item.prototype().anglesSignature();
-
-            var numImpls = (int) (Math.random() * 5);
-            var impls = new ArrayList<EntryImpl>();
-            for (int i = 0; i < numImpls; i++)
-                impls.add(new EntryImpl("mod" + i, "desc" + i, "in" + i, "out" + i));
-
+            var impls = BookEntries.INSTANCE.get(id);
             entries.add(new Entry(id, name, dir, sig, impls));
         });
     }
@@ -55,10 +51,6 @@ public class AutocompleteOptions {
     }
 
     public static record Entry(Identifier id, String name,
-            HexDir dir, String sig, List<EntryImpl> impls) {
-    }
-
-    public static record EntryImpl(String mod, String desc,
-            String in, String out) {
+            HexDir dir, String sig, List<BookEntries.Entry> impls) {
     }
 }

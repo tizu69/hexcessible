@@ -151,10 +151,14 @@ public class AutocompleteProvider {
 
         var docN = "[" + (chosenDoc + 1) + "/" + opt.impls().size() + "]";
         var impl = opt.impls().get(chosenDoc);
-        var args = impl.in() + " -> " + impl.out();
-        var subtext = "\n" + impl.desc() + "\n" + impl.mod();
+        var args = (impl.in() + " -> " + impl.out()).strip();
+
+        var subtext = "\n" + Text.translatable(impl.desc()).getString()
+                .replaceAll("\\$\\([^)]*\\)|/\\$", "")
+                .replaceAll("[\\s^]_", " ");
         var description = Text.literal(docN + " " + args).formatted(Formatting.GRAY)
                 .append(Text.literal(subtext).formatted(Formatting.DARK_GRAY));
+
         return tr.wrapLines(description, 170);
     }
 
