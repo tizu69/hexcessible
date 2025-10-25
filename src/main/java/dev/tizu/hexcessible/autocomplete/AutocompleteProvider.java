@@ -104,8 +104,14 @@ public class AutocompleteProvider {
     public void onRender(DrawContext ctx, int mx, int my) {
         if (presentAt == null)
             return;
-        var tr = MinecraftClient.getInstance().textRenderer;
+        renderQueryTooltip(ctx, mx, my);
+        if (opts.isEmpty())
+            return;
+        renderAutocompleteTooltips(ctx, mx, my);
+    }
 
+    private void renderQueryTooltip(DrawContext ctx, int mx, int my) {
+        var tr = MinecraftClient.getInstance().textRenderer;
         var tInput = !query.equals("")
                 ? Text.literal(query)
                         .append(Text.literal(" " + opts.size())
@@ -113,12 +119,18 @@ public class AutocompleteProvider {
                 : Text.translatable("hexcessible.start_typing")
                         .formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
         ctx.drawTooltip(tr, tInput, mx, my);
+    }
 
-        if (opts.isEmpty())
-            return;
+    private void renderAutocompleteTooltips(DrawContext ctx, int mx, int my) {
+        List<Text> options = prepareOptions();
+        List<OrderedText> descLines = prepareDescription();
+        drawTooltips(ctx, mx, my, options, descLines);
+    }
+
+    private List<Text> prepareOptions() {
         var optsStart = Math.max(0, Math.min(chosen - 2, opts.size() - 7));
         var optsEnd = Math.min(opts.size(), optsStart + 7);
-        List<Text> options = IntStream.range(optsStart, optsEnd)
+        return IntStream.range(optsStart, optsEnd)
                 .mapToObj(i -> {
                     var picked = i == chosen;
                     var fmt = picked ? Formatting.BLUE : Formatting.GRAY;
@@ -127,11 +139,18 @@ public class AutocompleteProvider {
                     return Text.literal(text).formatted(fmt);
                 })
                 .collect(Collectors.toList());
+    }
 
+    private List<OrderedText> prepareDescription() {
+        var tr = MinecraftClient.getInstance().textRenderer;
         var desc = "Read the iota associated with the given pattern out of the Akashic Library with its Record at the given position. This has no range limit. Costs about one Amethyst Dust.";
         var description = Text.literal("vector, pattern -> any").formatted(Formatting.GRAY)
                 .append(Text.literal("\n" + desc).formatted(Formatting.DARK_GRAY));
-        List<OrderedText> descLines = tr.wrapLines(description, 170);
+        return tr.wrapLines(description, 170);
+    }
+
+    private void drawTooltips(DrawContext ctx, int mx, int my, List<Text> options, List<OrderedText> descLines) {
+        var tr = MinecraftClient.getInstance().textRenderer;
 
         var descH = descLines.size() * (tr.fontHeight + 1);
         var descW = descLines.stream().mapToInt(tr::getWidth).max().orElse(0);
