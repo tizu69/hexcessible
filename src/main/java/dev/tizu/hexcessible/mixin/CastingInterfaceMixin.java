@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
-import dev.tizu.hexcessible.AutocompleteProvider;
+import dev.tizu.hexcessible.autocomplete.AutocompleteProvider;
 import net.minecraft.client.gui.DrawContext;
 
 @Mixin(GuiSpellcasting.class)
