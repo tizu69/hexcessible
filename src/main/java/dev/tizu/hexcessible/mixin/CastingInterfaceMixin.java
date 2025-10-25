@@ -13,6 +13,14 @@ import net.minecraft.client.gui.DrawContext;
 @Mixin(GuiSpellcasting.class)
 public class CastingInterfaceMixin {
 
+    /*
+     * @Inject(at = @At("HEAD"), method = "init", remap = false)
+     * private void init(CallbackInfo info) {
+     * BookEntries.INSTANCE.reindex();
+     * AutocompleteOptions.INSTANCE.reindex();
+     * }
+     */
+
     @Inject(at = @At(value = "INVOKE", target = "play", shift = At.Shift.BEFORE), method = "drawStart", remap = false)
     private void drawStart(double mxOut, double myOut, CallbackInfoReturnable<Boolean> info) {
         AutocompleteProvider.INSTANCE.startPresenting((int) mxOut, (int) myOut);

@@ -1,7 +1,10 @@
 package dev.tizu.hexcessible;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import com.google.gson.JsonSyntaxException;
 
@@ -19,6 +22,7 @@ public class BookEntries {
     public static final BookEntries INSTANCE = new BookEntries();
 
     private List<Entry> entries = List.of();
+    private Map<String, Supplier<Boolean>> locked = Map.of();
 
     private BookEntries() {
         reindex();
@@ -32,9 +36,9 @@ public class BookEntries {
         }
 
         var entries = new ArrayList<Entry>();
+        var locked = new HashMap<String, Supplier<Boolean>>();
         book.getContents().entries.forEach((entryid, entry) -> entry.getPages().forEach(page -> {
             var root = page.sourceObject;
-            // TODO: entry.shouldHide();
             if (root == null)
                 return;
             try {
@@ -42,6 +46,8 @@ public class BookEntries {
                 if (!type.equals("hexcasting:pattern"))
                     return;
                 var id = JsonHelper.getString(root, "op_id");
+                if (!locked.containsKey(id))
+                    locked.put(id, entry::isLocked);
                 var desc = JsonHelper.getString(root, "text", "");
                 var in = JsonHelper.getString(root, "input", "");
                 var out = JsonHelper.getString(root, "output", "");
@@ -51,6 +57,7 @@ public class BookEntries {
             }
         }));
         this.entries = entries;
+        this.locked = locked;
     }
 
     public static record Entry(String id, Identifier entryid,
@@ -64,5 +71,9 @@ public class BookEntries {
                 list.add(e);
         });
         return list;
+    }
+
+    public boolean isLocked(String id) {
+        return locked.getOrDefault(id, () -> false).get();
     }
 }

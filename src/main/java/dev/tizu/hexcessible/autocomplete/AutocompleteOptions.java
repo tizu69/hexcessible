@@ -3,6 +3,7 @@ package dev.tizu.hexcessible.autocomplete;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import at.petrak.hexcasting.api.HexAPI;
 import at.petrak.hexcasting.api.casting.math.HexDir;
@@ -27,10 +28,11 @@ public class AutocompleteOptions {
 
             var id = key.getValue();
             var name = Text.translatable(HexAPI.instance().getActionI18nKey(key)).getString();
+            Supplier<Boolean> checkLock = () -> BookEntries.INSTANCE.isLocked(id.toString());
             var dir = item.prototype().component1();
             var sig = item.prototype().anglesSignature();
             var impls = BookEntries.INSTANCE.get(id);
-            entries.add(new Entry(id, name, dir, sig, impls));
+            entries.add(new Entry(id, name, checkLock, dir, sig, impls));
         });
     }
 
@@ -50,7 +52,10 @@ public class AutocompleteOptions {
                 .toList();
     }
 
-    public static record Entry(Identifier id, String name,
+    public static record Entry(Identifier id, String name, Supplier<Boolean> checkLock,
             HexDir dir, String sig, List<BookEntries.Entry> impls) {
+        public boolean locked() {
+            return checkLock.get();
+        }
     }
 }

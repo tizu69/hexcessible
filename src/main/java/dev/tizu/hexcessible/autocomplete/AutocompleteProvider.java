@@ -1,5 +1,6 @@
 package dev.tizu.hexcessible.autocomplete;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2d;
 import org.lwjgl.glfw.GLFW;
 
+import dev.tizu.hexcessible.BookEntries;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
@@ -23,11 +25,14 @@ public class AutocompleteProvider {
     private int chosen = 0;
     private int chosenDoc = 0;
     private List<AutocompleteOptions.Entry> opts;
+    private List<AutocompleteOptions.Entry> optsWithLocked;
 
     public static final AutocompleteProvider INSTANCE = new AutocompleteProvider();
 
     private AutocompleteProvider() {
-        opts = AutocompleteOptions.INSTANCE.get();
+        optsWithLocked = AutocompleteOptions.INSTANCE.get();
+        opts = new ArrayList<>(optsWithLocked);
+        opts.removeIf(e -> e.locked());
     }
 
     public void startPresenting(int mx, int my) {
@@ -86,7 +91,9 @@ public class AutocompleteProvider {
 
     private void setQuery(String query) {
         this.query = query;
-        opts = AutocompleteOptions.INSTANCE.get(query);
+        optsWithLocked = AutocompleteOptions.INSTANCE.get(query);
+        opts = new ArrayList<>(optsWithLocked);
+        opts.removeIf(AutocompleteOptions.Entry::locked);
         chosen = 0;
         chosenDoc = 0;
     }
@@ -130,21 +137,25 @@ public class AutocompleteProvider {
     private List<Text> prepareOptions() {
         var optsStart = Math.max(0, Math.min(chosen - 2, opts.size() - 7));
         var optsEnd = Math.min(opts.size(), optsStart + 7);
-        return IntStream.range(optsStart, optsEnd)
+        List<Text> options = IntStream.range(optsStart, optsEnd)
                 .mapToObj(i -> {
                     var picked = i == chosen;
                     var fmt = picked ? Formatting.BLUE : Formatting.GRAY;
-                    var text = "<" + opts.get(i).dir() + "," + opts.get(i).sig() + "> "
-                            + opts.get(i).name();
+                    var icon = "<" + opts.get(i).dir() + "," + opts.get(i).sig() + "> ";
+                    var text = icon + opts.get(i).name();
                     return Text.literal(text).formatted(fmt);
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
+        var lockedN = optsWithLocked.size() - opts.size();
+        if (lockedN > 0)
+            options.add(Text.translatable("hexcessible.count_locked",
+                    lockedN).formatted(Formatting.DARK_GRAY));
+        return options;
     }
 
     private List<OrderedText> prepareDescription() {
         var tr = MinecraftClient.getInstance().textRenderer;
         var opt = opts.get(chosen);
-
         if (chosenDoc >= opt.impls().size())
             return List.of();
 
