@@ -92,7 +92,7 @@ public class AutocompleteProvider {
     }
 
     private void offsetChosen(int by) {
-        var size = AutocompleteOptions.INSTANCE.get(query).size();
+        var size = opts.size();
         chosen = ((chosen + by) % size + size) % size;
     }
 
