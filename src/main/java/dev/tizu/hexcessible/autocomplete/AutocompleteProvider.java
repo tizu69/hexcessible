@@ -143,9 +143,18 @@ public class AutocompleteProvider {
 
     private List<OrderedText> prepareDescription() {
         var tr = MinecraftClient.getInstance().textRenderer;
-        var desc = "Read the iota associated with the given pattern out of the Akashic Library with its Record at the given position. This has no range limit. Costs about one Amethyst Dust.";
-        var description = Text.literal("vector, pattern -> any").formatted(Formatting.GRAY)
-                .append(Text.literal("\n" + desc).formatted(Formatting.DARK_GRAY));
+        var opt = opts.get(chosen);
+
+        if (chosenDoc >= opt.impls().size())
+            return List.of(Text.literal("[0/0]").formatted(Formatting.DARK_GRAY)
+                    .asOrderedText());
+
+        var docN = "[" + (chosenDoc + 1) + "/" + opt.impls().size() + "]";
+        var impl = opt.impls().get(chosenDoc);
+        var args = impl.in() + " -> " + impl.out();
+        var subtext = "\n" + impl.desc() + "\n" + impl.mod();
+        var description = Text.literal(docN + " " + args).formatted(Formatting.GRAY)
+                .append(Text.literal(subtext).formatted(Formatting.DARK_GRAY));
         return tr.wrapLines(description, 170);
     }
 
