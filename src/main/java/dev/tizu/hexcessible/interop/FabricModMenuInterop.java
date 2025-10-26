@@ -9,10 +9,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
 @Environment(EnvType.CLIENT)
-public class ModMenuInterop implements ModMenuApi {
+public class FabricModMenuInterop implements ModMenuApi {
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
+        HexcessibleConfig.get();
         return parent -> AutoConfig.getConfigScreen(HexcessibleConfig.class,
                 parent).get();
     }
