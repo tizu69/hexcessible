@@ -22,12 +22,17 @@ public class HexcessibleConfig implements ConfigData {
         return instance;
     }
 
-    @ConfigEntry.Gui.NoTooltip
-    public boolean debug = false;
+    @ConfigEntry.Gui.Tooltip
+    public boolean dimCastUI = false;
+    @ConfigEntry.Gui.Tooltip
+    public boolean hideFloaties = false;
 
     @ConfigEntry.Gui.PrefixText
     @ConfigEntry.Gui.Tooltip
     public boolean inspectMouse = true;
+
+    @ConfigEntry.Gui.NoTooltip
+    public boolean debug = false;
 
     @Override
     public void validatePostLoad() throws ValidationException {
