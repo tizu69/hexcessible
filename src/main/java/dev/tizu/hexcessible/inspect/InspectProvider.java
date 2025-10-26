@@ -13,13 +13,19 @@ import net.minecraft.util.Formatting;
 
 public class InspectProvider {
     private final CastingInterfaceAccessor castui;
+    private long lastMouseMoved = 0;
 
     public InspectProvider(CastingInterfaceAccessor castui) {
         this.castui = castui;
     }
 
+    public void onMouseMove() {
+        lastMouseMoved = System.currentTimeMillis();
+    }
+
     public void onMouseRender(DrawContext ctx, int mx, int my) {
-        if (!castui.isDrawing())
+        if (System.currentTimeMillis() - lastMouseMoved < 500
+                || !castui.isDrawing())
             return;
         var state = new State(castui.getStart(), castui.getPattern());
         InspectProvider.render(ctx, mx, my, state);

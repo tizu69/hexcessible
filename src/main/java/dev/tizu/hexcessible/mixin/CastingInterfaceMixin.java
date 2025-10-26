@@ -14,8 +14,6 @@ import net.minecraft.client.gui.DrawContext;
 
 @Mixin(GuiSpellcasting.class)
 public class CastingInterfaceMixin {
-    long lastMouseMoved = 0;
-
     CastingInterfaceAccessor castui;
     InspectProvider inspectProvider;
 
@@ -32,16 +30,14 @@ public class CastingInterfaceMixin {
 
     @Inject(at = @At("HEAD"), method = "mouseMoved", remap = false)
     private void mouseMoved(CallbackInfo info) {
-        lastMouseMoved = System.currentTimeMillis();
+        inspectProvider.onMouseMove();
         AutocompleteProvider.INSTANCE.stopPresenting();
     }
 
     @Inject(at = @At("RETURN"), method = "render", remap = false)
     public void onRender(DrawContext ctx, int mouseX, int mouseY, float delta,
             CallbackInfo info) {
-        if (System.currentTimeMillis() - lastMouseMoved > 500)
-            inspectProvider.onMouseRender(ctx, mouseX, mouseY);
-
+        inspectProvider.onMouseRender(ctx, mouseX, mouseY);
         AutocompleteProvider.INSTANCE.onRender(ctx, mouseX, mouseY);
     }
 
