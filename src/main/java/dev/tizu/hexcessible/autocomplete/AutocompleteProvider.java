@@ -42,11 +42,16 @@ public class AutocompleteProvider {
         setQuery("");
     }
 
-    public void onCharType(char chr) {
+    public boolean onCharType(char chr) {
+        if (presentAt == null)
+            return false;
         setQuery(query + chr);
+        return true;
     }
 
     public boolean onKeyPress(int keyCode, int modifiers) {
+        if (presentAt == null)
+            return false;
         var ctrl = (modifiers & GLFW.GLFW_MOD_CONTROL) != 0;
         switch (keyCode) {
             case GLFW.GLFW_KEY_BACKSPACE:
