@@ -16,7 +16,7 @@ public class HexcessibleConfig implements ConfigData {
 
     public static HexcessibleConfig get() {
         if (instance == null) {
-            AutoConfig.register(HexcessibleConfig.class, Toml4jConfigSerializer::new);
+            AutoConfig.register(HexcessibleConfig.class, GsonConfigSerializer::new);
             instance = AutoConfig.getConfigHolder(HexcessibleConfig.class).getConfig();
         }
         return instance;
