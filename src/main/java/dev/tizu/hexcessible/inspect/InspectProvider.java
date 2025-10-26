@@ -23,7 +23,11 @@ public class InspectProvider {
         lastMouseMoved = System.currentTimeMillis();
     }
 
-    public void onMouseRender(DrawContext ctx, int mx, int my) {
+    public void onRender(DrawContext ctx, int mx, int my) {
+        renderMouse(ctx, mx, my);
+    }
+
+    private void renderMouse(DrawContext ctx, int mx, int my) {
         if (System.currentTimeMillis() - lastMouseMoved < 500
                 || !castui.isDrawing())
             return;

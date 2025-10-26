@@ -27,9 +27,7 @@ public class AutocompleteProvider {
     private List<PatternEntries.Entry> opts;
     private List<PatternEntries.Entry> optsWithLocked;
 
-    public static final AutocompleteProvider INSTANCE = new AutocompleteProvider();
-
-    private AutocompleteProvider() {
+    public AutocompleteProvider() {
         optsWithLocked = PatternEntries.INSTANCE.get();
         opts = new ArrayList<>(optsWithLocked);
         opts.removeIf(PatternEntries.Entry::locked);
@@ -48,7 +46,7 @@ public class AutocompleteProvider {
         setQuery(query + chr);
     }
 
-    public boolean onKeyPress(int keyCode, int modifiers, Runnable onClose) {
+    public boolean onKeyPress(int keyCode, int modifiers) {
         var ctrl = (modifiers & GLFW.GLFW_MOD_CONTROL) != 0;
         switch (keyCode) {
             case GLFW.GLFW_KEY_BACKSPACE:
@@ -66,7 +64,7 @@ public class AutocompleteProvider {
                 if (presentAt != null)
                     stopPresenting();
                 else
-                    onClose.run();
+                    return false;
                 break;
             case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB:
                 // TODO: accept chosen option

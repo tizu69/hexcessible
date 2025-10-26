@@ -16,39 +16,42 @@ import net.minecraft.client.gui.DrawContext;
 public class CastingInterfaceMixin {
     CastingInterfaceAccessor castui;
     InspectProvider inspectProvider;
+    AutocompleteProvider autocompleteProvider;
 
     @Inject(at = @At("HEAD"), method = "init", remap = false)
     private void init(CallbackInfo info) {
         castui = new CastingInterfaceAccessor((GuiSpellcasting) (Object) this);
         inspectProvider = new InspectProvider(castui);
+        autocompleteProvider = new AutocompleteProvider();
     }
 
     @Inject(at = @At(value = "INVOKE", target = "play", shift = At.Shift.BEFORE), method = "drawStart", remap = false)
     private void drawStart(double mxOut, double myOut, CallbackInfoReturnable<Boolean> info) {
-        AutocompleteProvider.INSTANCE.startPresenting((int) mxOut, (int) myOut);
+        autocompleteProvider.startPresenting((int) mxOut, (int) myOut);
     }
 
     @Inject(at = @At("HEAD"), method = "mouseMoved", remap = false)
     private void mouseMoved(CallbackInfo info) {
         inspectProvider.onMouseMove();
-        AutocompleteProvider.INSTANCE.stopPresenting();
+        autocompleteProvider.stopPresenting();
     }
 
     @Inject(at = @At("RETURN"), method = "render", remap = false)
     public void onRender(DrawContext ctx, int mouseX, int mouseY, float delta,
             CallbackInfo info) {
-        inspectProvider.onMouseRender(ctx, mouseX, mouseY);
-        AutocompleteProvider.INSTANCE.onRender(ctx, mouseX, mouseY);
+        inspectProvider.onRender(ctx, mouseX, mouseY);
+        autocompleteProvider.onRender(ctx, mouseX, mouseY);
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        AutocompleteProvider.INSTANCE.onKeyPress(keyCode, modifiers,
-                ((GuiSpellcasting) (Object) this)::close);
+        if (autocompleteProvider.onKeyPress(keyCode, modifiers))
+            return true;
+        ((GuiSpellcasting) (Object) this).close();
         return true;
     }
 
     public boolean charTyped(char chr, int modifiers) {
-        AutocompleteProvider.INSTANCE.onCharType(chr);
+        autocompleteProvider.onCharType(chr);
         return true;
     }
 }
