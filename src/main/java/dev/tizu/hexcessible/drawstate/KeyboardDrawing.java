@@ -18,11 +18,13 @@ public final class KeyboardDrawing extends DrawState {
     private String sig;
     private HexCoord start = new HexCoord(0, 0);
 
-    public KeyboardDrawing(String sig) {
+    public KeyboardDrawing(CastCalc calc, String sig) {
+        super(calc);
         this.sig = sig;
     }
 
-    public KeyboardDrawing(String sig, HexCoord start) {
+    public KeyboardDrawing(CastCalc calc, String sig, HexCoord start) {
+        super(calc);
         this.sig = sig;
         this.start = start;
     }

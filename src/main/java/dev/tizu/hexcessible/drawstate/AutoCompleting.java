@@ -36,10 +36,13 @@ public final class AutoCompleting extends DrawState {
     private boolean lastInteractWasMouse = true;
     private Vec2f mousePos = new Vec2f(0, 0);
 
-    public AutoCompleting(HexCoord start, Vec2f anchor, float anchorSize) {
+    public AutoCompleting(CastCalc calc, HexCoord start) {
+        super(calc);
         this.start = start;
-        this.anchor = anchor;
-        this.breakoutSize = (float) Math.pow(anchorSize * 1.75, 2);
+
+        this.anchor = calc.coordToPx(start);
+        this.breakoutSize = (float) Math.pow(calc.hexSize() * 1.75, 2);
+
         optsWithLocked = PatternEntries.INSTANCE.get();
         opts = new ArrayList<>(optsWithLocked);
         opts.removeIf(PatternEntries.Entry::locked);
@@ -71,7 +74,7 @@ public final class AutoCompleting extends DrawState {
             case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB:
                 if (opts.isEmpty())
                     return;
-                nextState = new KeyboardDrawing(opts.get(chosen).sig(), start);
+                nextState = new KeyboardDrawing(calc, opts.get(chosen).sig(), start);
                 break;
             case GLFW.GLFW_KEY_UP:
                 offsetChosen(-1);
@@ -221,6 +224,6 @@ public final class AutoCompleting extends DrawState {
     @Override
     public void onMousePress(double mx, double my, int button) {
         // TODO: mouse-based interaction
-        requestExit();
+            requestExit();
     }
 }

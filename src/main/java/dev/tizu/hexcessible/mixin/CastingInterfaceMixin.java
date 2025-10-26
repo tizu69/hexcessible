@@ -20,16 +20,13 @@ import net.minecraft.client.gui.DrawContext;
 @Mixin(GuiSpellcasting.class)
 public class CastingInterfaceMixin {
     CastingInterfaceAccessor castui;
-    /*
-     * AutocompleteProvider autocompleteProvider;
-     * InspectProvider inspectProvider;
-     */
-
-    DrawState state = DrawState.getNew();
+    DrawState state;
 
     @Inject(at = @At("HEAD"), method = "init", remap = false)
     private void init(CallbackInfo info) {
-        castui = new CastingInterfaceAccessor((GuiSpellcasting) (Object) this);
+        var ui = (GuiSpellcasting) (Object) this;
+        castui = new CastingInterfaceAccessor(ui);
+        state = DrawState.getNew(ui);
     }
 
     @Inject(at = @At("HEAD"), method = "mouseMoved", remap = false)

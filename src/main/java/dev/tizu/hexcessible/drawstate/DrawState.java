@@ -4,15 +4,22 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
+import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import dev.tizu.hexcessible.CastingInterfaceAccessor;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.math.Vec2f;
 
 public sealed class DrawState
         permits Idling, MouseDrawing, KeyboardDrawing, AutoCompleting {
 
+    protected CastCalc calc;
     protected DrawState nextState = null;
     protected boolean wantsExit = false;
+
+    public DrawState(CastCalc calc) {
+        this.calc = calc;
+    }
 
     public void onRender(DrawContext ctx, int mx, int my) {
         // no-op
@@ -35,7 +42,7 @@ public sealed class DrawState
     }
 
     public void requestExit() {
-        nextState = getNew();
+        nextState = getNew(this.calc);
     }
 
     public List<String> getDebugInfo() {
@@ -46,8 +53,12 @@ public sealed class DrawState
         return true;
     }
 
-    public static DrawState getNew() {
-        return new Idling();
+    public static DrawState getNew(CastCalc calc) {
+        return new Idling(calc);
+    }
+
+    public static DrawState getNew(GuiSpellcasting ui) {
+        return getNew(new CastCalc(ui));
     }
 
     @Nullable
@@ -69,15 +80,35 @@ public sealed class DrawState
         };
         if (allowed.contains(current.getClass()))
             return null;
+        var calc = new CastCalc(ui);
         return switch (hexState) {
-            case BETWEENPATTERNS -> new Idling();
-            case JUSTSTARTED -> new AutoCompleting(castui.getStart(),
-                    ui.coordToPx(castui.getStart()), ui.hexSize());
-            case DRAWING -> new MouseDrawing(castui);
+            case BETWEENPATTERNS -> new Idling(calc);
+            case JUSTSTARTED -> new AutoCompleting(calc, castui.getStart());
+            case DRAWING -> new MouseDrawing(calc, castui);
         };
     }
 
     public static boolean shouldClose(DrawState current) {
         return current.wantsExit;
+    }
+
+    public static class CastCalc {
+        private final GuiSpellcasting castui;
+
+        private CastCalc(GuiSpellcasting castui) {
+            this.castui = castui;
+        }
+
+        public HexCoord pxToCoord(Vec2f px) {
+            return castui.pxToCoord(px);
+        }
+
+        public Vec2f coordToPx(HexCoord coord) {
+            return castui.coordToPx(coord);
+        }
+
+        public float hexSize() {
+            return castui.hexSize();
+        }
     }
 }

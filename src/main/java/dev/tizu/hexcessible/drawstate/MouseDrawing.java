@@ -10,7 +10,8 @@ public final class MouseDrawing extends DrawState {
     private CastingInterfaceAccessor castui;
     private long lastMouseMoved = 0;
 
-    public MouseDrawing(CastingInterfaceAccessor castui) {
+    public MouseDrawing(CastCalc calc, CastingInterfaceAccessor castui) {
+        super(calc);
         this.castui = castui;
     }
 
