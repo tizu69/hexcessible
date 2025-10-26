@@ -7,13 +7,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
+import dev.tizu.hexcessible.CastingInterfaceAccessor;
 import dev.tizu.hexcessible.autocomplete.AutocompleteProvider;
-import dev.tizu.hexcessible.inspect.InspectMouse;
+import dev.tizu.hexcessible.inspect.InspectProvider;
 import net.minecraft.client.gui.DrawContext;
 
 @Mixin(GuiSpellcasting.class)
 public class CastingInterfaceMixin {
     long lastMouseMoved = 0;
+
+    CastingInterfaceAccessor castui;
+    InspectProvider inspectProvider;
+
+    @Inject(at = @At("HEAD"), method = "init", remap = false)
+    private void init(CallbackInfo info) {
+        castui = new CastingInterfaceAccessor((GuiSpellcasting) (Object) this);
+        inspectProvider = new InspectProvider(castui);
+    }
 
     @Inject(at = @At(value = "INVOKE", target = "play", shift = At.Shift.BEFORE), method = "drawStart", remap = false)
     private void drawStart(double mxOut, double myOut, CallbackInfoReturnable<Boolean> info) {
@@ -30,8 +40,7 @@ public class CastingInterfaceMixin {
     public void onRender(DrawContext ctx, int mouseX, int mouseY, float delta,
             CallbackInfo info) {
         if (System.currentTimeMillis() - lastMouseMoved > 500)
-            new InspectMouse((GuiSpellcasting) (Object) this)
-                    .onRender(ctx, mouseX, mouseY);
+            inspectProvider.onMouseRender(ctx, mouseX, mouseY);
 
         AutocompleteProvider.INSTANCE.onRender(ctx, mouseX, mouseY);
     }

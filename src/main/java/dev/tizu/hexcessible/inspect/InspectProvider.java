@@ -4,17 +4,28 @@ import java.util.ArrayList;
 
 import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
+import dev.tizu.hexcessible.CastingInterfaceAccessor;
 import dev.tizu.hexcessible.PatternEntries;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-class InspectRenderer {
-    private InspectRenderer() {
+public class InspectProvider {
+    private final CastingInterfaceAccessor castui;
+
+    public InspectProvider(CastingInterfaceAccessor castui) {
+        this.castui = castui;
     }
 
-    public static void render(DrawContext ctx, int mx, int my, State state) {
+    public void onMouseRender(DrawContext ctx, int mx, int my) {
+        if (!castui.isDrawing())
+            return;
+        var state = new State(castui.getStart(), castui.getPattern());
+        InspectProvider.render(ctx, mx, my, state);
+    }
+
+    private static void render(DrawContext ctx, int mx, int my, State state) {
         var tr = MinecraftClient.getInstance().textRenderer;
 
         var pattern = state.pattern().anglesSignature();
