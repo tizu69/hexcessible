@@ -25,13 +25,13 @@ public final class KeyboardDrawing extends DrawState {
     private String sig;
     private HexCoord start = new HexCoord(0, 0);
 
-    public KeyboardDrawing(CastCalc calc, String sig) {
-        super(calc);
+    public KeyboardDrawing(CastRef castref, String sig) {
+        super(castref);
         this.sig = sig;
     }
 
-    public KeyboardDrawing(CastCalc calc, String sig, HexCoord start) {
-        super(calc);
+    public KeyboardDrawing(CastRef castref, String sig, HexCoord start) {
+        super(castref);
         this.sig = sig;
         this.start = start;
     }
@@ -71,7 +71,7 @@ public final class KeyboardDrawing extends DrawState {
 
         var points = new ArrayList<Vec2f>();
         for (var c : pat.positions())
-            points.add(calc.coordToPx(new HexCoord(
+            points.add(castref.coordToPx(new HexCoord(
                     c.getQ() + start.getQ(),
                     c.getR() + start.getR())));
 

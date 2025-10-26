@@ -36,12 +36,12 @@ public final class AutoCompleting extends DrawState {
     private boolean lastInteractWasMouse = true;
     private Vec2f mousePos = new Vec2f(0, 0);
 
-    public AutoCompleting(CastCalc calc, HexCoord start) {
-        super(calc);
+    public AutoCompleting(CastRef castref, HexCoord start) {
+        super(castref);
         this.start = start;
 
-        this.anchor = calc.coordToPx(start);
-        this.breakoutSize = (float) Math.pow(calc.hexSize() * 1.75, 2);
+        this.anchor = castref.coordToPx(start);
+        this.breakoutSize = (float) Math.pow(castref.hexSize() * 1.75, 2);
 
         optsWithLocked = PatternEntries.INSTANCE.get();
         opts = new ArrayList<>(optsWithLocked);
@@ -74,7 +74,7 @@ public final class AutoCompleting extends DrawState {
             case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB:
                 if (opts.isEmpty())
                     return;
-                nextState = new KeyboardDrawing(calc, opts.get(chosen).sig(), start);
+                nextState = new KeyboardDrawing(castref, opts.get(chosen).sig(), start);
                 break;
             case GLFW.GLFW_KEY_UP:
                 offsetChosen(-1);

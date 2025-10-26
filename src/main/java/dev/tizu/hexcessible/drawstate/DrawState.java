@@ -13,12 +13,12 @@ import net.minecraft.util.math.Vec2f;
 public sealed class DrawState
         permits Idling, MouseDrawing, KeyboardDrawing, AutoCompleting {
 
-    protected CastCalc calc;
+    protected CastRef castref;
     protected DrawState nextState = null;
     protected boolean wantsExit = false;
 
-    public DrawState(CastCalc calc) {
-        this.calc = calc;
+    public DrawState(CastRef castref) {
+        this.castref = castref;
     }
 
     public void onRender(DrawContext ctx, int mx, int my) {
@@ -42,7 +42,7 @@ public sealed class DrawState
     }
 
     public void requestExit() {
-        nextState = getNew(this.calc);
+        nextState = getNew(this.castref);
     }
 
     public List<String> getDebugInfo() {
@@ -53,12 +53,12 @@ public sealed class DrawState
         return true;
     }
 
-    public static DrawState getNew(CastCalc calc) {
-        return new Idling(calc);
+    public static DrawState getNew(CastRef castref) {
+        return new Idling(castref);
     }
 
     public static DrawState getNew(GuiSpellcasting castui) {
-        return getNew(new CastCalc(castui));
+        return getNew(new CastRef(castui));
     }
 
     @Nullable
@@ -80,11 +80,11 @@ public sealed class DrawState
         };
         if (allowed.contains(current.getClass()))
             return null;
-        var calc = new CastCalc(castui);
+        var castref = new CastRef(castui);
         return switch (hexState) {
-            case BETWEENPATTERNS -> new Idling(calc);
-            case JUSTSTARTED -> new AutoCompleting(calc, accessor.getStart());
-            case DRAWING -> new MouseDrawing(calc, accessor);
+            case BETWEENPATTERNS -> new Idling(castref);
+            case JUSTSTARTED -> new AutoCompleting(castref, accessor.getStart());
+            case DRAWING -> new MouseDrawing(castref, accessor);
         };
     }
 
@@ -92,10 +92,10 @@ public sealed class DrawState
         return current.wantsExit;
     }
 
-    public static class CastCalc {
+    public static class CastRef {
         private final GuiSpellcasting castui;
 
-        private CastCalc(GuiSpellcasting castui) {
+        private CastRef(GuiSpellcasting castui) {
             this.castui = castui;
         }
 

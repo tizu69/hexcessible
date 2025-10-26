@@ -1,8 +1,8 @@
 package dev.tizu.hexcessible.drawstate;
 
 public final class Idling extends DrawState {
-    public Idling(CastCalc calc) {
-        super(calc);
+    public Idling(CastRef castref) {
+        super(castref);
     }
 
     @Override
@@ -13,6 +13,6 @@ public final class Idling extends DrawState {
     @Override
     public void onCharType(char chr) {
         if (KeyboardDrawing.validSig.contains(chr))
-            nextState = new KeyboardDrawing(calc, String.valueOf(chr));
+            nextState = new KeyboardDrawing(castref, String.valueOf(chr));
     }
 }
