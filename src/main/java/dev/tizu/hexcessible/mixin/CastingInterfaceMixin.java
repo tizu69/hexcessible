@@ -7,58 +7,83 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import dev.tizu.hexcessible.CastingInterfaceAccessor;
-import dev.tizu.hexcessible.autocomplete.AutocompleteProvider;
-import dev.tizu.hexcessible.inspect.InspectProvider;
+import dev.tizu.hexcessible.HexcessibleConfig;
+import dev.tizu.hexcessible.drawstate.DrawState;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 
 @Mixin(GuiSpellcasting.class)
 public class CastingInterfaceMixin {
     CastingInterfaceAccessor castui;
-    AutocompleteProvider autocompleteProvider;
-    InspectProvider inspectProvider;
+    /*
+     * AutocompleteProvider autocompleteProvider;
+     * InspectProvider inspectProvider;
+     */
+
+    DrawState state = DrawState.getNew();
 
     @Inject(at = @At("HEAD"), method = "init", remap = false)
     private void init(CallbackInfo info) {
         castui = new CastingInterfaceAccessor((GuiSpellcasting) (Object) this);
-        autocompleteProvider = new AutocompleteProvider();
-        inspectProvider = new InspectProvider(castui);
-    }
-
-    @Inject(at = @At(value = "INVOKE", target = "play", shift = At.Shift.BEFORE), method = "drawStart", remap = false)
-    private void drawStart(double mxOut, double myOut, CallbackInfoReturnable<Boolean> info) {
-        autocompleteProvider.startPresenting((int) mxOut, (int) myOut);
     }
 
     @Inject(at = @At("HEAD"), method = "mouseMoved", remap = false)
-    private void mouseMoved(CallbackInfo info) {
-        autocompleteProvider.stopPresenting();
-        inspectProvider.onMouseMove();
+    private void mouseMoved(double mx, double my, CallbackInfo info) {
+        state.onMouseMove(mx, my);
+    }
+
+    @Inject(at = @At("HEAD"), method = "mouseClicked", remap = false)
+    private void mouseClicked(double mx, double my, int button, CallbackInfoReturnable<Boolean> info) {
+        state.onMousePress(mx, my, button);
     }
 
     @Inject(at = @At("RETURN"), method = "render", remap = false)
-    public void onRender(DrawContext ctx, int mouseX, int mouseY, float delta,
+    public void render(DrawContext ctx, int mouseX, int mouseY, float delta,
             CallbackInfo info) {
-        autocompleteProvider.onRender(ctx, mouseX, mouseY);
-        inspectProvider.onRender(ctx, mouseX, mouseY);
+        if (DrawState.shouldClose(state)) {
+            ((GuiSpellcasting) (Object) this).close();
+            return;
+        }
+
+        var nextState = DrawState.updateRequired((GuiSpellcasting) (Object) this, state);
+        if (nextState != null)
+            state = nextState;
+
+        if (HexcessibleConfig.get().debug) {
+            renderDebug(ctx, state.getClass().getSimpleName(), 0);
+            var debug = state.getDebugInfo();
+            for (int i = 0; i < debug.size(); i++)
+                renderDebug(ctx, debug.get(i), i + 1);
+        }
+
+        state.onRender(ctx, mouseX, mouseY);
+    }
+
+    private void renderDebug(DrawContext ctx, String text, int i) {
+        ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer,
+                text, 5, 5 + (i * 10), 0xFFFFFF);
+    }
+
+    @WrapMethod(method = "drawStart", remap = false)
+    private boolean drawStart(double mxOut, double myOut, Operation<Boolean> original) {
+        return state.allowStartDrawing() && original.call(mxOut, myOut);
     }
 
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return autocompleteProvider.onKeyPress(keyCode, modifiers)
-                || inspectProvider.onKeyPress(keyCode, modifiers)
-                || keyPressedClose(keyCode);
-    }
-
-    private boolean keyPressedClose(int keyCode) {
-        if (keyCode != GLFW.GLFW_KEY_ESCAPE)
-            return false;
-        ((GuiSpellcasting) (Object) this).close();
+        if (keyCode == GLFW.GLFW_KEY_ESCAPE)
+            state.requestExit();
+        else
+            state.onKeyPress(keyCode, modifiers);
         return true;
     }
 
     public boolean charTyped(char chr, int modifiers) {
-        return autocompleteProvider.onCharType(chr)
-                || inspectProvider.onCharType(chr);
+        state.onCharType(chr);
+        return true;
     }
 }

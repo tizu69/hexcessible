@@ -14,8 +14,11 @@ public class CastingInterfaceAccessor {
     public static final Class<?> PatternDrawState;
     private static final MethodHandle getDrawState;
 
+    public static final Class<?> JustStartedClass;
+    public static final MethodHandle getStartJ;
+
     private static final Class<?> DrawingClass;
-    private static final MethodHandle getStart;
+    private static final MethodHandle getStartD;
     private static final MethodHandle getWipPattern;
 
     static {
@@ -24,9 +27,14 @@ public class CastingInterfaceAccessor {
             var priv = MethodHandles.privateLookupIn(GuiSpellcasting.class, mhLookup);
             getDrawState = priv.findGetter(GuiSpellcasting.class, "drawState", PatternDrawState);
 
+            JustStartedClass = Class
+                    .forName("at.petrak.hexcasting.client.gui.GuiSpellcasting$PatternDrawState$JustStarted");
+            priv = MethodHandles.privateLookupIn(JustStartedClass, mhLookup);
+            getStartJ = priv.findGetter(JustStartedClass, "start", HexCoord.class);
+
             DrawingClass = Class.forName("at.petrak.hexcasting.client.gui.GuiSpellcasting$PatternDrawState$Drawing");
             priv = MethodHandles.privateLookupIn(DrawingClass, mhLookup);
-            getStart = priv.findGetter(DrawingClass, "start", HexCoord.class);
+            getStartD = priv.findGetter(DrawingClass, "start", HexCoord.class);
             getWipPattern = priv.findGetter(DrawingClass, "wipPattern", HexPattern.class);
         } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
             throw new ExceptionInInitializerError(e);
@@ -39,33 +47,36 @@ public class CastingInterfaceAccessor {
         this.inst = inst;
     }
 
-    public boolean isDrawing() {
+    public State getState() {
         try {
             Object drawState = getDrawState.invoke(inst);
-            String className = drawState.getClass().getSimpleName();
-            return className.equals("Drawing");
+            return switch (drawState.getClass().getSimpleName()) {
+                case "BetweenPatterns" -> State.BETWEENPATTERNS;
+                case "JustStarted" -> State.JUSTSTARTED;
+                case "Drawing" -> State.DRAWING;
+                default -> throw new IllegalStateException();
+            };
         } catch (Throwable e) {
-            Hexcessible.LOGGER.error("Failed to check CastUI state", e);
-            return false;
+            Hexcessible.LOGGER.error("Failed to get CastUI state", e);
+            return State.BETWEENPATTERNS;
         }
     }
 
-    public boolean isIdle() {
-        try {
-            Object drawState = getDrawState.invoke(inst);
-            String className = drawState.getClass().getSimpleName();
-            return className.equals("BetweenPatterns");
-        } catch (Throwable e) {
-            Hexcessible.LOGGER.error("Failed to check CastUI state", e);
-            return false;
-        }
+    public enum State {
+        BETWEENPATTERNS, JUSTSTARTED, DRAWING
     }
 
     public HexCoord getStart() {
         try {
-            return (HexCoord) getStart.invoke(getDrawState.invoke(inst));
+            return switch (getState()) {
+                case JUSTSTARTED ->
+                    (HexCoord) getStartJ.invoke(getDrawState.invoke(inst));
+                case DRAWING ->
+                    (HexCoord) getStartD.invoke(getDrawState.invoke(inst));
+                default -> throw new IllegalStateException();
+            };
         } catch (Throwable e) {
-            Hexcessible.LOGGER.error("Failed to get CastUI state", e);
+            Hexcessible.LOGGER.error("Failed to get CastUI drawing state", e);
             return null;
         }
     }
@@ -74,7 +85,7 @@ public class CastingInterfaceAccessor {
         try {
             return (HexPattern) getWipPattern.invoke(getDrawState.invoke(inst));
         } catch (Throwable e) {
-            Hexcessible.LOGGER.error("Failed to get CastUI state", e);
+            Hexcessible.LOGGER.error("Failed to get CastUI drawing state", e);
             return null;
         }
     }

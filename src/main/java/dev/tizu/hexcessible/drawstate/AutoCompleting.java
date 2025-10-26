@@ -1,4 +1,4 @@
-package dev.tizu.hexcessible.autocomplete;
+package dev.tizu.hexcessible.drawstate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,10 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2d;
 import org.lwjgl.glfw.GLFW;
 
+import at.petrak.hexcasting.api.casting.math.HexCoord;
 import dev.tizu.hexcessible.PatternEntries;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -17,41 +16,45 @@ import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.Vec2f;
 
-public class AutocompleteProvider {
-    @Nullable
-    private Vector2d presentAt = null;
+public final class AutoCompleting extends DrawState {
+    private HexCoord start;
+    private Vec2f anchor;
+    /**
+     * Simulates the circle after which dragging would snap to a point, to stop
+     * autocompleting if mouse moves too far away after stopping drawing. 1.75
+     * times bigger than actual circle, to prevent instant breakout if the user
+     * clicks right on the edge.
+     */
+    private float breakoutSize;
     private String query = "";
     private int chosen = 0;
     private int chosenDoc = 0;
     private List<PatternEntries.Entry> opts;
     private List<PatternEntries.Entry> optsWithLocked;
+    private boolean lastInteractWasMouse = true;
+    private Vec2f mousePos = new Vec2f(0, 0);
 
-    public AutocompleteProvider() {
+    public AutoCompleting(HexCoord start, Vec2f anchor, float anchorSize) {
+        this.start = start;
+        this.anchor = anchor;
+        this.breakoutSize = (float) Math.pow(anchorSize * 1.75, 2);
         optsWithLocked = PatternEntries.INSTANCE.get();
         opts = new ArrayList<>(optsWithLocked);
         opts.removeIf(PatternEntries.Entry::locked);
     }
 
-    public void startPresenting(int mx, int my) {
-        presentAt = new Vector2d(mx, my);
-    }
-
-    public void stopPresenting() {
-        presentAt = null;
-        setQuery("");
-    }
-
-    public boolean onCharType(char chr) {
-        if (presentAt == null)
-            return false;
+    @Override
+    public void onCharType(char chr) {
         setQuery(query + chr);
-        return true;
     }
 
-    public boolean onKeyPress(int keyCode, int modifiers) {
-        if (presentAt == null)
-            return false;
+    @Override
+    public void onKeyPress(int keyCode, int modifiers) {
+        lastInteractWasMouse = false;
+        if (noDistract())
+            return; // if no options are shown, no need to provide opt controls.
         var ctrl = (modifiers & GLFW.GLFW_MOD_CONTROL) != 0;
         switch (keyCode) {
             case GLFW.GLFW_KEY_BACKSPACE:
@@ -65,14 +68,10 @@ public class AutocompleteProvider {
                             : query.substring(0, query.length() - 1));
                 }
                 break;
-            case GLFW.GLFW_KEY_ESCAPE:
-                if (presentAt != null)
-                    stopPresenting();
-                else
-                    return false;
-                break;
             case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB:
-                // TODO: accept chosen option
+                if (opts.isEmpty())
+                    return;
+                nextState = new KeyboardDrawing(opts.get(chosen).sig(), start);
                 break;
             case GLFW.GLFW_KEY_UP:
                 offsetChosen(-1);
@@ -87,9 +86,24 @@ public class AutocompleteProvider {
                 offsetChosenDoc(1);
                 break;
             default:
-                return false;
         }
-        return true;
+    }
+
+    @Override
+    public void onMouseMove(double mx, double my) {
+        mousePos = new Vec2f((float) mx, (float) my);
+        lastInteractWasMouse = true;
+
+        if (!noDistract())
+            return;
+        if (mousePos.distanceSquared(anchor) > breakoutSize)
+            requestExit();
+    }
+
+    @Override
+    public List<String> getDebugInfo() {
+        return List.of("Breakout: " + mousePos.distanceSquared(anchor)
+                + " < " + breakoutSize);
     }
 
     private void setQuery(String query) {
@@ -112,16 +126,17 @@ public class AutocompleteProvider {
         chosenDoc = ((chosenDoc + by) % size + size) % size;
     }
 
+    @Override
     public void onRender(DrawContext ctx, int mx, int my) {
-        if (presentAt == null)
+        var x = (int) anchor.x;
+        var y = (int) anchor.y;
+        renderQueryTooltip(ctx, x, y, mx, my);
+        if (opts.isEmpty() || noDistract())
             return;
-        renderQueryTooltip(ctx, mx, my);
-        if (opts.isEmpty())
-            return;
-        renderAutocompleteTooltips(ctx, mx, my);
+        renderAutocompleteTooltips(ctx, x, y);
     }
 
-    private void renderQueryTooltip(DrawContext ctx, int mx, int my) {
+    private void renderQueryTooltip(DrawContext ctx, int x, int y, int mx, int my) {
         var tr = MinecraftClient.getInstance().textRenderer;
         var tInput = !query.equals("")
                 ? Text.literal(query)
@@ -129,13 +144,17 @@ public class AutocompleteProvider {
                                 .formatted(Formatting.DARK_GRAY))
                 : Text.translatable("hexcessible.start_typing")
                         .formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
-        ctx.drawTooltip(tr, tInput, mx, my);
+        ctx.drawTooltip(tr, tInput, noDistract() ? mx : x, noDistract() ? my : y);
     }
 
-    private void renderAutocompleteTooltips(DrawContext ctx, int mx, int my) {
+    private boolean noDistract() {
+        return lastInteractWasMouse && query.isEmpty();
+    }
+
+    private void renderAutocompleteTooltips(DrawContext ctx, int x, int y) {
         List<Text> options = prepareOptions();
         List<OrderedText> descLines = prepareDescription();
-        drawTooltips(ctx, mx, my, options, descLines);
+        drawTooltips(ctx, x, y, options, descLines);
     }
 
     private List<Text> prepareOptions() {
@@ -192,5 +211,16 @@ public class AutocompleteProvider {
         var descriptionY = renderAbove ? my - (descLines.size() * fontH) - 9 : my + 17;
         var descriptionX = descLeft ? optionsX - descW - 9 : optionsX + optsW + 9;
         ctx.drawTooltip(tr, descLines, HoveredTooltipPositioner.INSTANCE, descriptionX, descriptionY);
+    }
+
+    @Override
+    public boolean allowStartDrawing() {
+        return noDistract();
+    }
+
+    @Override
+    public void onMousePress(double mx, double my, int button) {
+        // TODO: mouse-based interaction
+        requestExit();
     }
 }

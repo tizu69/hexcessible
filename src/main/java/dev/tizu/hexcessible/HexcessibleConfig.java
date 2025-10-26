@@ -4,6 +4,7 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
+import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 
 @Config(name = Hexcessible.MOD_ID)
@@ -21,6 +22,9 @@ public class HexcessibleConfig implements ConfigData {
         }
         return instance;
     }
+
+    @ConfigEntry.Gui.NoTooltip
+    public boolean debug = false;
 
     @ConfigEntry.Gui.PrefixText
     @ConfigEntry.Gui.Tooltip
