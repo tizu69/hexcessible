@@ -50,7 +50,8 @@ public class PatternEntries {
                 .map(e -> {
                     var score = 0;
                     score += Utils.fuzzyScore(query, e.name) * 3; // important!
-                    score += Utils.fuzzyScore(query, e.id.toString());
+                    score += Utils.fuzzyScore(query, e.id.toString()
+                            .replaceAll("[:_/]", " "));
                     return Map.entry(e, score);
                 })
                 .filter(e -> e.getValue() > 0)
