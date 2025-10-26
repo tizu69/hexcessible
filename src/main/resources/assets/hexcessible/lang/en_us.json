@@ -4,9 +4,11 @@
 
     "text.autoconfig.hexcessible.title": "Hexcessible Config",
     "text.autoconfig.hexcessible.option.debug": "Debug Mode",
+    "text.autoconfig.hexcessible.option.dimmed": "Dim UI",
+    "text.autoconfig.hexcessible.option.dimmed.@Tooltip": "Dim the background of the spellcasting interface",
     "text.autoconfig.hexcessible.option.hideFloaties": "Hide floaties",
-    "text.autoconfig.hexcessible.option.hideFloaties.@Tooltip": "Hide the patterns shown around the player when casting spells.",
+    "text.autoconfig.hexcessible.option.hideFloaties.@Tooltip": "Hide the patterns shown around the player when casting spells",
     "text.autoconfig.hexcessible.option.inspectMouse.@PrefixText": "Inspect Drawing",
     "text.autoconfig.hexcessible.option.inspectMouse": "Mouse",
-    "text.autoconfig.hexcessible.option.inspectMouse.@Tooltip": "Show details about the pattern you're drawing if you hold still."
+    "text.autoconfig.hexcessible.option.inspectMouse.@Tooltip": "Show details about the pattern you're drawing if you hold still"
 }
