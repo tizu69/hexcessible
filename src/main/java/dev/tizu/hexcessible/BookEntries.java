@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.google.gson.JsonSyntaxException;
 
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import vazkii.patchouli.common.book.BookRegistry;
@@ -62,6 +63,15 @@ public class BookEntries {
 
     public static record Entry(String id, Identifier entryid,
             String desc, String in, String out) {
+        public String getArgs() {
+            return (in + " -> " + out).strip();
+        }
+
+        public String getDesc() {
+            return Text.translatable(desc).getString()
+                    .replaceAll("\\$\\([^)]*\\)|/\\$", "")
+                    .replaceAll("[\\s^]_", " ");
+        }
     }
 
     public List<Entry> get(Identifier id) {

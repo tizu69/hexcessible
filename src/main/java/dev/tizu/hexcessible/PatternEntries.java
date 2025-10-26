@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.jetbrains.annotations.Nullable;
+
 import at.petrak.hexcasting.api.HexAPI;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
@@ -48,14 +50,6 @@ public class PatternEntries {
                     var score = 0;
                     score += Utils.fuzzyScore(query, e.name) * 3; // important!
                     score += Utils.fuzzyScore(query, e.id.toString());
-                    /*
-                     * score += Utils.fuzzyScore(query, e.sig) * 2;
-                     * for (var impl : e.impls) {
-                     * score += Utils.fuzzyScore(query, impl.desc());
-                     * score += Utils.fuzzyScore(query, impl.in());
-                     * score += Utils.fuzzyScore(query, impl.out());
-                     * }
-                     */
                     return Map.entry(e, score);
                 })
                 .filter(e -> e.getValue() > 0)
@@ -64,10 +58,22 @@ public class PatternEntries {
                 .toList();
     }
 
+    @Nullable
+    public Entry getFromSig(String sig) {
+        return entries.stream()
+                .filter(e -> e.sig.equals(sig))
+                .findFirst()
+                .orElse(null);
+    }
+
     public static record Entry(Identifier id, String name, Supplier<Boolean> checkLock,
             HexDir dir, String sig, List<BookEntries.Entry> impls) {
         public boolean locked() {
             return checkLock.get();
+        }
+
+        public String toString() {
+            return "<" + dir + "," + sig + "> " + name;
         }
     }
 }

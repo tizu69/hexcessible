@@ -2,14 +2,12 @@ package dev.tizu.hexcessible.inspect;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.util.function.Function;
 
 import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import dev.tizu.hexcessible.Hexcessible;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.util.math.Vec2f;
 
 public class InspectMouse {
     private static final MethodHandles.Lookup mhLookup = MethodHandles.lookup();
@@ -32,7 +30,6 @@ public class InspectMouse {
             getStart = priv.findGetter(DrawingClass, "start", HexCoord.class);
             getWipPattern = priv.findGetter(DrawingClass, "wipPattern", HexPattern.class);
         } catch (NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
-            Hexcessible.LOGGER.error("Failed to initialize CastUI state", e);
             throw new ExceptionInInitializerError(e);
         }
     }

@@ -11,7 +11,6 @@ import org.joml.Vector2d;
 import org.lwjgl.glfw.GLFW;
 
 import dev.tizu.hexcessible.PatternEntries;
-import dev.tizu.hexcessible.BookEntries;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
@@ -33,7 +32,7 @@ public class AutocompleteProvider {
     private AutocompleteProvider() {
         optsWithLocked = PatternEntries.INSTANCE.get();
         opts = new ArrayList<>(optsWithLocked);
-        opts.removeIf(e -> e.locked());
+        opts.removeIf(PatternEntries.Entry::locked);
     }
 
     public void startPresenting(int mx, int my) {
@@ -143,9 +142,7 @@ public class AutocompleteProvider {
                 .mapToObj(i -> {
                     var picked = i == chosen;
                     var fmt = picked ? Formatting.BLUE : Formatting.GRAY;
-                    var icon = "<" + opts.get(i).dir() + "," + opts.get(i).sig() + "> ";
-                    var text = icon + opts.get(i).name();
-                    return Text.literal(text).formatted(fmt);
+                    return Text.literal(opts.get(i).toString()).formatted(fmt);
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
         var lockedN = optsWithLocked.size() - opts.size();
@@ -163,13 +160,9 @@ public class AutocompleteProvider {
 
         var docN = "[" + (chosenDoc + 1) + "/" + opt.impls().size() + "]";
         var impl = opt.impls().get(chosenDoc);
-        var args = (impl.in() + " -> " + impl.out()).strip();
 
-        var subtext = "\n" + Text.translatable(impl.desc()).getString()
-                .replaceAll("\\$\\([^)]*\\)|/\\$", "")
-                .replaceAll("[\\s^]_", " ");
-        var description = Text.literal(docN + " " + args).formatted(Formatting.GRAY)
-                .append(Text.literal(subtext).formatted(Formatting.DARK_GRAY));
+        var description = Text.literal(docN + " " + impl.getArgs()).formatted(Formatting.GRAY)
+                .append(Text.literal("\n" + impl.getDesc()).formatted(Formatting.DARK_GRAY));
 
         return tr.wrapLines(description, 170);
     }

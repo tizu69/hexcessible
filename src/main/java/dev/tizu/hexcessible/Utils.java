@@ -29,5 +29,4 @@ public class Utils {
             score += 15;
         return qi == q.length() ? score : 0;
     }
-
 }
