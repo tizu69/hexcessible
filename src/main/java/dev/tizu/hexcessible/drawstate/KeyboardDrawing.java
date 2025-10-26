@@ -5,15 +5,22 @@ import java.util.List;
 
 import org.lwjgl.glfw.GLFW;
 
+import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
+import at.petrak.hexcasting.api.casting.math.HexDir;
+import at.petrak.hexcasting.api.casting.math.HexPattern;
+import at.petrak.hexcasting.client.render.RenderLib;
 import dev.tizu.hexcessible.entries.PatternEntries;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.Vec2f;
 
 public final class KeyboardDrawing extends DrawState {
     public static final List<Character> validSig = List.of('q', 'w', 'e', 'a', 'd');
+    public static final int COLOR1 = 0xff_64c8ff;
+    public static final int COLOR2 = 0xff_fecbe6;
 
     private String sig;
     private HexCoord start = new HexCoord(0, 0);
@@ -33,6 +40,7 @@ public final class KeyboardDrawing extends DrawState {
     public void onRender(DrawContext ctx, int mx, int my) {
         if (sig.isEmpty())
             requestExit();
+        renderPattern(ctx);
         KeyboardDrawing.render(ctx, mx, my, sig, "␣⇥↩");
     }
 
@@ -54,6 +62,36 @@ public final class KeyboardDrawing extends DrawState {
         if (sig.isEmpty())
             return;
         sig = sig.substring(0, sig.length() - 1);
+    }
+
+    public void renderPattern(DrawContext ctx) {
+        var mat = ctx.getMatrices().peek().getPositionMatrix();
+        var pat = new HexPattern(HexDir.EAST, getAngles());
+        var duplicates = RenderLib.findDupIndices(pat.positions());
+
+        var points = new ArrayList<Vec2f>();
+        for (var c : pat.positions())
+            points.add(calc.coordToPx(new HexCoord(
+                    c.getQ() + start.getQ(),
+                    c.getR() + start.getR())));
+
+        RenderLib.drawPatternFromPoints(mat, points, duplicates, false, COLOR1,
+                COLOR2, 0.1f, RenderLib.DEFAULT_READABILITY_OFFSET, 1f, 0);
+    }
+
+    public List<HexAngle> getAngles() {
+        var angles = new ArrayList<HexAngle>();
+        for (var c : sig.chars().toArray()) {
+            angles.add(switch (c) {
+                case 'q' -> HexAngle.LEFT;
+                case 'w' -> HexAngle.FORWARD;
+                case 'e' -> HexAngle.RIGHT;
+                case 'a' -> HexAngle.LEFT_BACK;
+                case 'd' -> HexAngle.RIGHT_BACK;
+                default -> throw new IllegalStateException(c + " invalid");
+            });
+        }
+        return angles;
     }
 
     public static void render(DrawContext ctx, int mx, int my, String pattern,
