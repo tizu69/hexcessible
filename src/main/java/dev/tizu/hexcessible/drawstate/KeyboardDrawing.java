@@ -54,8 +54,16 @@ public final class KeyboardDrawing extends DrawState {
 
     @Override
     public void onKeyPress(int keyCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_BACKSPACE)
-            removeCharFromSig();
+        switch (keyCode) {
+            case GLFW.GLFW_KEY_BACKSPACE:
+                removeCharFromSig();
+                break;
+            case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB, GLFW.GLFW_KEY_SPACE:
+                castref.execute(new HexPattern(HexDir.EAST, getAngles()), start);
+                requestExit();
+                break;
+            default:
+        }
     }
 
     private void removeCharFromSig() {

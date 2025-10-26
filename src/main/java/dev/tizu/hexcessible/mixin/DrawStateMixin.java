@@ -1,7 +1,11 @@
 package dev.tizu.hexcessible.mixin;
 
+import java.util.List;
+import java.util.Set;
+
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -10,23 +14,35 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 
+import at.petrak.hexcasting.api.casting.eval.ResolvedPattern;
+import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import dev.tizu.hexcessible.CastingInterfaceAccessor;
 import dev.tizu.hexcessible.HexcessibleConfig;
 import dev.tizu.hexcessible.drawstate.DrawState;
+import dev.tizu.hexcessible.drawstate.DrawState.CastRef;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.Hand;
 
 @Mixin(GuiSpellcasting.class)
 public class DrawStateMixin {
     CastingInterfaceAccessor accessor;
     DrawState state;
 
+    @Shadow
+    private Hand handOpenedWith;
+    @Shadow
+    private List<ResolvedPattern> patterns;
+    @Shadow
+    private Set<HexCoord> usedSpots;
+
     @Inject(at = @At("HEAD"), method = "init", remap = false)
     private void init(CallbackInfo info) {
         var castui = (GuiSpellcasting) (Object) this;
         accessor = new CastingInterfaceAccessor(castui);
-        state = DrawState.getNew(castui);
+        var castref = new CastRef(castui, handOpenedWith, patterns, usedSpots);
+        state = DrawState.getNew(castref);
     }
 
     @Inject(at = @At("HEAD"), method = "mouseMoved", remap = false)

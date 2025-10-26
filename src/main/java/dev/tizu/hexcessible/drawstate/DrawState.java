@@ -1,13 +1,20 @@
 package dev.tizu.hexcessible.drawstate;
 
 import java.util.List;
+import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
+import at.petrak.hexcasting.api.casting.eval.ResolvedPattern;
+import at.petrak.hexcasting.api.casting.eval.ResolvedPatternType;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
+import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
+import at.petrak.hexcasting.common.msgs.MsgNewSpellPatternC2S;
+import at.petrak.hexcasting.xplat.IClientXplatAbstractions;
 import dev.tizu.hexcessible.CastingInterfaceAccessor;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec2f;
 
 public sealed class DrawState
@@ -57,10 +64,6 @@ public sealed class DrawState
         return new Idling(castref);
     }
 
-    public static DrawState getNew(GuiSpellcasting castui) {
-        return getNew(new CastRef(castui));
-    }
-
     @Nullable
     public static DrawState updateRequired(GuiSpellcasting castui, DrawState current) {
         if (current.nextState != null)
@@ -80,11 +83,10 @@ public sealed class DrawState
         };
         if (allowed.contains(current.getClass()))
             return null;
-        var castref = new CastRef(castui);
         return switch (hexState) {
-            case BETWEENPATTERNS -> new Idling(castref);
-            case JUSTSTARTED -> new AutoCompleting(castref, accessor.getStart());
-            case DRAWING -> new MouseDrawing(castref, accessor);
+            case BETWEENPATTERNS -> new Idling(current.castref);
+            case JUSTSTARTED -> new AutoCompleting(current.castref, accessor.getStart());
+            case DRAWING -> new MouseDrawing(current.castref, accessor);
         };
     }
 
@@ -94,9 +96,16 @@ public sealed class DrawState
 
     public static class CastRef {
         private final GuiSpellcasting castui;
+        private final Hand handOpenedWith;
+        private final List<ResolvedPattern> patterns;
+        private final Set<HexCoord> usedSpots;
 
-        private CastRef(GuiSpellcasting castui) {
+        public CastRef(GuiSpellcasting castui, Hand handOpenedWith,
+                List<ResolvedPattern> patterns, Set<HexCoord> usedSpots) {
             this.castui = castui;
+            this.handOpenedWith = handOpenedWith;
+            this.patterns = patterns;
+            this.usedSpots = usedSpots;
         }
 
         public HexCoord pxToCoord(Vec2f px) {
@@ -109,6 +118,17 @@ public sealed class DrawState
 
         public float hexSize() {
             return castui.hexSize();
+        }
+
+        public boolean isUsed(HexCoord coord) {
+            return usedSpots.contains(coord);
+        }
+
+        public void execute(HexPattern pat, HexCoord start) {
+            this.patterns.add(new ResolvedPattern(pat, start, ResolvedPatternType.UNRESOLVED));
+            this.usedSpots.addAll(pat.positions(start));
+            IClientXplatAbstractions.INSTANCE.sendPacketToServer(
+                    new MsgNewSpellPatternC2S(handOpenedWith, pat, patterns));
         }
     }
 }
