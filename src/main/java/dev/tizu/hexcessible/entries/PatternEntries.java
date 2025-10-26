@@ -1,4 +1,4 @@
-package dev.tizu.hexcessible;
+package dev.tizu.hexcessible.entries;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import at.petrak.hexcasting.api.HexAPI;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
+import dev.tizu.hexcessible.Utils;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 

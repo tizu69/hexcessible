@@ -1,4 +1,4 @@
-package dev.tizu.hexcessible;
+package dev.tizu.hexcessible.entries;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.google.gson.JsonSyntaxException;
 
+import dev.tizu.hexcessible.Hexcessible;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;

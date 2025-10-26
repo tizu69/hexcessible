@@ -57,16 +57,16 @@ public sealed class DrawState
         return new Idling(calc);
     }
 
-    public static DrawState getNew(GuiSpellcasting ui) {
-        return getNew(new CastCalc(ui));
+    public static DrawState getNew(GuiSpellcasting castui) {
+        return getNew(new CastCalc(castui));
     }
 
     @Nullable
-    public static DrawState updateRequired(GuiSpellcasting ui, DrawState current) {
+    public static DrawState updateRequired(GuiSpellcasting castui, DrawState current) {
         if (current.nextState != null)
             return current.nextState;
-        var castui = new CastingInterfaceAccessor(ui);
-        var hexState = castui.getState();
+        var accessor = new CastingInterfaceAccessor(castui);
+        var hexState = accessor.getState();
         var allowed = switch (hexState) {
             case BETWEENPATTERNS ->
                 List.of(Idling.class,
@@ -80,11 +80,11 @@ public sealed class DrawState
         };
         if (allowed.contains(current.getClass()))
             return null;
-        var calc = new CastCalc(ui);
+        var calc = new CastCalc(castui);
         return switch (hexState) {
             case BETWEENPATTERNS -> new Idling(calc);
-            case JUSTSTARTED -> new AutoCompleting(calc, castui.getStart());
-            case DRAWING -> new MouseDrawing(calc, castui);
+            case JUSTSTARTED -> new AutoCompleting(calc, accessor.getStart());
+            case DRAWING -> new MouseDrawing(calc, accessor);
         };
     }
 

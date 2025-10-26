@@ -7,12 +7,12 @@ import dev.tizu.hexcessible.CastingInterfaceAccessor.State;
 import net.minecraft.client.gui.DrawContext;
 
 public final class MouseDrawing extends DrawState {
-    private CastingInterfaceAccessor castui;
+    private CastingInterfaceAccessor accessor;
     private long lastMouseMoved = 0;
 
-    public MouseDrawing(CastCalc calc, CastingInterfaceAccessor castui) {
+    public MouseDrawing(CastCalc calc, CastingInterfaceAccessor accessor) {
         super(calc);
-        this.castui = castui;
+        this.accessor = accessor;
     }
 
     @Override
@@ -23,9 +23,9 @@ public final class MouseDrawing extends DrawState {
     @Override
     public void onRender(DrawContext ctx, int mx, int my) {
         if (lastMouseMoved + 500 > System.currentTimeMillis() ||
-                castui.getState() != State.DRAWING)
+                accessor.getState() != State.DRAWING)
             return;
-        var sig = castui.getPattern().anglesSignature();
+        var sig = accessor.getPattern().anglesSignature();
         KeyboardDrawing.render(ctx, mx, my, sig, "");
     }
 

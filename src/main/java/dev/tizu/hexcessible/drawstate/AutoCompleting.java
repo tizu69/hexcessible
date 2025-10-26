@@ -9,7 +9,7 @@ import java.util.stream.IntStream;
 import org.lwjgl.glfw.GLFW;
 
 import at.petrak.hexcasting.api.casting.math.HexCoord;
-import dev.tizu.hexcessible.PatternEntries;
+import dev.tizu.hexcessible.entries.PatternEntries;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
