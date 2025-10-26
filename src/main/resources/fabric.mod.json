@@ -3,7 +3,7 @@
     "id": "hexcessible",
     "version": "${version}",
     "name": "Hexcessible",
-    "description": "Hex Casting for the lazy.",
+    "description": "Hex Casting, with a bit more accessibility sprinkled on top.",
     "authors": ["Ruby (tizu)"],
     "contact": {
         "sources": "https://g.tizu.dev/hexcessible"
