@@ -82,4 +82,10 @@ public final class KeyboardDrawing extends DrawState {
     public boolean allowStartDrawing() {
         return sig.isEmpty();
     }
+
+    @Override
+    public void onMousePress(double mx, double my, int button) {
+        if (button == 0)
+            requestExit();
+    }
 }

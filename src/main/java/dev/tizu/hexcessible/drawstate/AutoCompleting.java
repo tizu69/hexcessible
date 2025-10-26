@@ -224,6 +224,7 @@ public final class AutoCompleting extends DrawState {
     @Override
     public void onMousePress(double mx, double my, int button) {
         // TODO: mouse-based interaction
+        if (button == 0)
             requestExit();
     }
 }
