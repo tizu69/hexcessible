@@ -1,4 +1,9 @@
 {
     "hexcessible.start_typing": "Start typing...",
-    "hexcessible.count_locked": "+%s locked"
+    "hexcessible.count_locked": "+%s locked",
+
+    "text.autoconfig.hexcessible.title": "Hexcessible Config",
+    "text.autoconfig.hexcessible.option.inspectMouse.@PrefixText": "Inspect Drawing",
+    "text.autoconfig.hexcessible.option.inspectMouse": "Mouse",
+    "text.autoconfig.hexcessible.option.inspectMouse.@Tooltip": "Show details about the pattern you're drawing if you hold still."
 }

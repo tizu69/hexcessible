@@ -13,7 +13,8 @@
     "environment": "client",
     "entrypoints": {
         "main": [],
-        "client": ["dev.tizu.hexcessible.Hexcessible"]
+        "client": ["dev.tizu.hexcessible.Hexcessible"],
+        "modmenu": ["dev.tizu.hexcessible.interop.ModMenuInterop"]
     },
     "mixins": [
         {

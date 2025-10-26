@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 import dev.tizu.hexcessible.CastingInterfaceAccessor;
+import dev.tizu.hexcessible.HexcessibleConfig;
 import dev.tizu.hexcessible.PatternEntries;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -28,7 +29,8 @@ public class InspectProvider {
     }
 
     private void renderMouse(DrawContext ctx, int mx, int my) {
-        if (System.currentTimeMillis() - lastMouseMoved < 500
+        if (!HexcessibleConfig.get().inspectMouse
+                || System.currentTimeMillis() - lastMouseMoved < 500
                 || !castui.isDrawing())
             return;
         var state = new State(castui.getStart(), castui.getPattern());
