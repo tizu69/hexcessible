@@ -11,7 +11,7 @@ import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.render.RenderLib;
-import dev.tizu.hexcessible.HexcessibleConfig;
+import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.entries.PatternEntries;
 import net.minecraft.client.MinecraftClient;
@@ -131,7 +131,7 @@ public final class KeyboardDrawing extends DrawState {
         RenderLib.drawPatternFromPoints(mat, points, duplicates, false, COLOR1,
                 COLOR2, 0.1f, RenderLib.DEFAULT_READABILITY_OFFSET, 1f, 0);
 
-        if (!HexcessibleConfig.get().debug)
+        if (!Hexcessible.cfg().debug)
             return;
         drawLine(ctx, origin, start);
         RenderLib.drawSpot(mat, castref.coordToPx(start), 6f, 0f, 0f, 1f, 1f);

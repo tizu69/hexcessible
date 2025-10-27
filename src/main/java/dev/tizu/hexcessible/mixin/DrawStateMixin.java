@@ -17,7 +17,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import at.petrak.hexcasting.api.casting.eval.ResolvedPattern;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
-import dev.tizu.hexcessible.HexcessibleConfig;
+import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.accessor.CastingInterfaceAccessor;
 import dev.tizu.hexcessible.accessor.DrawStateMixinAccessor;
@@ -70,7 +70,7 @@ public class DrawStateMixin implements DrawStateMixinAccessor {
         if (nextState != null)
             state = nextState;
 
-        if (HexcessibleConfig.get().debug) {
+        if (Hexcessible.cfg().debug) {
             renderDebug(ctx, state.getClass().getSimpleName(), 0);
             var debug = state.getDebugInfo();
             for (int i = 0; i < debug.size(); i++)

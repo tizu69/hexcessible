@@ -6,7 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 
 import at.petrak.hexcasting.api.client.ClientRenderHelper;
-import dev.tizu.hexcessible.HexcessibleConfig;
+import dev.tizu.hexcessible.Hexcessible;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -18,7 +18,7 @@ public class FloatiesMixin {
     @WrapMethod(method = "renderCastingStack", remap = false)
     private static void renderCastingStack(MatrixStack ps, PlayerEntity player, float pticks,
             Operation<Void> original) {
-        if (!HexcessibleConfig.get().hideFloaties)
+        if (!Hexcessible.cfg().hideFloaties)
             original.call(ps, player, pticks);
     }
 }

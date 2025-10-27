@@ -1,7 +1,5 @@
 package dev.tizu.hexcessible;
 
-import at.petrak.hexcasting.api.casting.math.HexCoord;
-
 public class Utils {
     private Utils() {
     }

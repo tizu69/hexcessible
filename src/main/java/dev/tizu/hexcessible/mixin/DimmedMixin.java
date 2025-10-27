@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
-import dev.tizu.hexcessible.HexcessibleConfig;
+import dev.tizu.hexcessible.Hexcessible;
 import net.minecraft.client.gui.DrawContext;
 
 @Mixin(GuiSpellcasting.class)
@@ -15,7 +15,7 @@ public class DimmedMixin {
     @Inject(at = @At("HEAD"), method = "render")
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta,
             CallbackInfo info) {
-        if (HexcessibleConfig.get().dimmed)
+        if (Hexcessible.cfg().dimmed)
             ((GuiSpellcasting) (Object) this).renderBackground(ctx);
     }
 }
