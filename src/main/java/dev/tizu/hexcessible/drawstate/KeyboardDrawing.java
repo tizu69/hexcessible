@@ -11,6 +11,7 @@ import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.render.RenderLib;
+import dev.tizu.hexcessible.HexcessibleConfig;
 import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.entries.PatternEntries;
 import net.minecraft.client.MinecraftClient;
@@ -56,7 +57,7 @@ public final class KeyboardDrawing extends DrawState {
         if (sig.isEmpty())
             requestExit();
         renderPattern(ctx);
-        KeyboardDrawing.render(ctx, mx, my, sig, "␣⇥↩");
+        KeyboardDrawing.render(ctx, mx, my, sig, "␣⇥↩", start() == null);
     }
 
     @Override
@@ -81,19 +82,25 @@ public final class KeyboardDrawing extends DrawState {
                 requestExit();
                 break;
             case GLFW.GLFW_KEY_H, GLFW.GLFW_KEY_LEFT:
-                origin = origin.plus(new HexCoord(-1, 0));
+                moveOrigin(-1, 0);
                 break;
             case GLFW.GLFW_KEY_J, GLFW.GLFW_KEY_DOWN:
-                origin = origin.plus(new HexCoord(0, 1));
+                moveOrigin(0, 1);
                 break;
             case GLFW.GLFW_KEY_K, GLFW.GLFW_KEY_UP:
-                origin = origin.plus(new HexCoord(0, -1));
+                moveOrigin(0, -1);
                 break;
             case GLFW.GLFW_KEY_L, GLFW.GLFW_KEY_RIGHT:
-                origin = origin.plus(new HexCoord(1, 0));
+                moveOrigin(1, 0);
                 break;
             default:
         }
+    }
+
+    private void moveOrigin(int x, int y) {
+        var next = origin.plus(new HexCoord(x, y));
+        if (castref.isVisible(next)) // don't allow out of bounds
+            origin = next;
     }
 
     private void removeCharFromSig() {
@@ -120,9 +127,11 @@ public final class KeyboardDrawing extends DrawState {
         RenderLib.drawPatternFromPoints(mat, points, duplicates, false, COLOR1,
                 COLOR2, 0.1f, RenderLib.DEFAULT_READABILITY_OFFSET, 1f, 0);
 
+        if (!HexcessibleConfig.get().debug)
+            return;
         drawLine(ctx, origin, start);
-        RenderLib.drawSpot(mat, castref.coordToPx(origin), 6f, 1f, 0f, 0f, 1f);
         RenderLib.drawSpot(mat, castref.coordToPx(start), 6f, 0f, 0f, 1f, 1f);
+        RenderLib.drawSpot(mat, castref.coordToPx(origin), 6f, 0f, 1f, 0f, 1f);
     }
 
     private void drawLine(DrawContext ctx, HexCoord start, HexCoord end) {
@@ -155,16 +164,24 @@ public final class KeyboardDrawing extends DrawState {
     }
 
     public static void render(DrawContext ctx, int mx, int my, String pattern,
-            String submitKeys) {
+            String submitKeys, boolean failed) {
+        var y = my;
         var tr = MinecraftClient.getInstance().textRenderer;
         if (pattern.isEmpty())
             return;
 
         var text = Text.literal(pattern);
-        if (!submitKeys.isEmpty())
+        if (!submitKeys.isEmpty() && !failed)
             text = text.append(Text.literal(" " + submitKeys)
                     .formatted(Formatting.DARK_GRAY));
-        ctx.drawTooltip(tr, text, mx, my);
+        ctx.drawTooltip(tr, text, mx, y);
+        y += 17;
+
+        if (failed) {
+            ctx.drawTooltip(tr, Text.translatable("hexcessible.no_space")
+                    .formatted(Formatting.RED), mx, y);
+            y += 17;
+        }
 
         var entry = PatternEntries.INSTANCE.getFromSig(pattern);
         if (entry == null)
@@ -173,7 +190,7 @@ public final class KeyboardDrawing extends DrawState {
         subtext.add(Text.literal(entry.toString()).formatted(Formatting.BLUE));
         for (var impl : entry.impls())
             subtext.add(Text.literal(impl.getArgs()).formatted(Formatting.DARK_GRAY));
-        ctx.drawTooltip(tr, subtext, mx, my + 17);
+        ctx.drawTooltip(tr, subtext, mx, y);
     }
 
     @Override

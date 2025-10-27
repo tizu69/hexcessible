@@ -47,7 +47,13 @@ public class CastRef {
     }
 
     public boolean isUsed(HexCoord coord) {
-        return usedSpots.contains(coord);
+        return usedSpots.contains(coord) || !isVisible(coord);
+    }
+
+    public boolean isVisible(HexCoord coord) {
+        var pos = coordToPx(coord);
+        return pos.x >= 0 && pos.x < castui.width
+                && pos.y >= 0 && pos.y < castui.height;
     }
 
     public void execute(HexPattern pat, HexCoord start) {
@@ -83,6 +89,8 @@ public class CastRef {
                 if (visited.add(next))
                     queue.add(next);
             }
+            if (visited.size() > 512)
+                return null; // breakout
         }
         return null;
     }

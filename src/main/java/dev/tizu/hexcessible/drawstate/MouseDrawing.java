@@ -27,7 +27,7 @@ public final class MouseDrawing extends DrawState {
                 accessor.getState() != State.DRAWING)
             return;
         var sig = accessor.getPattern().anglesSignature();
-        KeyboardDrawing.render(ctx, mx, my, sig, "");
+        KeyboardDrawing.render(ctx, mx, my, sig, "", false);
     }
 
     @Override

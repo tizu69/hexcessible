@@ -1,6 +1,7 @@
 {
     "hexcessible.start_typing": "Start typing...",
     "hexcessible.count_locked": "+%s locked",
+    "hexcessible.no_space": "Can't place this here",
 
     "text.autoconfig.hexcessible.title": "Hexcessible Config",
     "text.autoconfig.hexcessible.option.debug": "Debug Mode",
