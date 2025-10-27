@@ -20,6 +20,6 @@ public final class MouseDrawing extends DrawState {
             return;
         var sig = accessor.getPattern().anglesSignature();
         KeyboardDrawing.render(ctx, mx, my, sig, "", false,
-                Hexcessible.cfg().mouseDraw);
+                Hexcessible.cfg().mouseDraw.tooltip);
     }
 }
