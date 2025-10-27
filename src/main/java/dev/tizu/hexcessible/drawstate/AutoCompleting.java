@@ -9,12 +9,10 @@ import java.util.stream.IntStream;
 import org.lwjgl.glfw.GLFW;
 
 import at.petrak.hexcasting.api.casting.math.HexCoord;
+import dev.tizu.hexcessible.Tippy;
 import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.entries.PatternEntries;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
-import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec2f;
@@ -134,31 +132,35 @@ public final class AutoCompleting extends DrawState {
     public void onRender(DrawContext ctx, int mx, int my) {
         var x = (int) anchor.x;
         var y = (int) anchor.y;
-        renderQueryTooltip(ctx, x, y, mx, my);
-        if (opts.isEmpty() || noDistract())
-            return;
-        renderAutocompleteTooltips(ctx, x, y);
+
+        var tippy = Tippy.stack(Tippy.Direction.DOWN, Tippy.Alignment.START, 1);
+        renderQueryTooltip(tippy);
+        if (!opts.isEmpty() && !noDistract())
+            renderAutocompleteTooltips(tippy);
+        tippy.render(ctx, mx, my);
     }
 
-    private void renderQueryTooltip(DrawContext ctx, int x, int y, int mx, int my) {
-        var tr = MinecraftClient.getInstance().textRenderer;
+    private void renderQueryTooltip(Tippy.Stack tippy) {
         var tInput = !query.equals("")
                 ? Text.literal(query)
                         .append(Text.literal(" " + opts.size())
                                 .formatted(Formatting.DARK_GRAY))
                 : Text.translatable("hexcessible.start_typing")
                         .formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
-        ctx.drawTooltip(tr, tInput, noDistract() ? mx : x, noDistract() ? my : y);
+        tippy.add(Tippy.tip().add(Tippy.line(tInput)));
     }
 
     private boolean noDistract() {
         return lastInteractWasMouse && query.isEmpty();
     }
 
-    private void renderAutocompleteTooltips(DrawContext ctx, int x, int y) {
+    private void renderAutocompleteTooltips(Tippy.Stack tippy) {
         List<Text> options = prepareOptions();
-        List<OrderedText> descLines = prepareDescription();
-        drawTooltips(ctx, x, y, options, descLines);
+        List<Text> descLines = prepareDescription();
+
+        var stack = Tippy.stack(Tippy.Direction.RIGHT, Tippy.Alignment.START, 1);
+        drawTooltips(stack, options, descLines);
+        tippy.add(stack);
     }
 
     private List<Text> prepareOptions() {
@@ -178,8 +180,7 @@ public final class AutoCompleting extends DrawState {
         return options;
     }
 
-    private List<OrderedText> prepareDescription() {
-        var tr = MinecraftClient.getInstance().textRenderer;
+    private List<Text> prepareDescription() {
         var opt = opts.get(chosen);
         if (chosenDoc >= opt.impls().size())
             return List.of();
@@ -187,34 +188,23 @@ public final class AutoCompleting extends DrawState {
         var docN = "[" + (chosenDoc + 1) + "/" + opt.impls().size() + "]";
         var impl = opt.impls().get(chosenDoc);
 
-        var description = Text.literal(docN + " " + impl.getArgs()).formatted(Formatting.GRAY)
-                .append(Text.literal("\n" + impl.getDesc()).formatted(Formatting.DARK_GRAY));
-
-        return tr.wrapLines(description, 170);
+        return List.of(
+                Text.literal(docN + " " + impl.getArgs()).formatted(Formatting.GRAY),
+                Text.literal("\n" + impl.getDesc()).formatted(Formatting.DARK_GRAY));
     }
 
-    private void drawTooltips(DrawContext ctx, int mx, int my, List<Text> options, List<OrderedText> descLines) {
-        var tr = MinecraftClient.getInstance().textRenderer;
-
-        var descH = descLines.size() * (tr.fontHeight + 1);
-        var descW = descLines.stream().mapToInt(tr::getWidth).max().orElse(0);
-        var optsH = options.size() * (tr.fontHeight + 1);
-        var optsW = options.stream().mapToInt(tr::getWidth).max().orElse(0);
-        var renderAbove = ctx.getScaledWindowHeight() - my < Math.max(descH, optsH) + 15;
-        var descLeft = ctx.getScaledWindowWidth() - mx - optsW < descW + 30;
-        var fontH = tr.fontHeight + 1;
-
-        var optionsX = mx + optsW + 20 > ctx.getScaledWindowWidth()
-                ? ctx.getScaledWindowWidth() - optsW - 20
-                : mx;
-        var optionsY = renderAbove ? my - (options.size() * fontH) - 9 : my + 17;
-        ctx.drawTooltip(tr, options, optionsX, optionsY);
+    private void drawTooltips(Tippy.Stack tippy, List<Text> options, List<Text> descLines) {
+        var tip = Tippy.tip();
+        for (var option : options)
+            tip = tip.add(Tippy.line(option));
+        tippy.add(tip);
 
         if (descLines.isEmpty())
             return;
-        var descriptionY = renderAbove ? my - (descLines.size() * fontH) - 9 : my + 17;
-        var descriptionX = descLeft ? optionsX - descW - 9 : optionsX + optsW + 9;
-        ctx.drawTooltip(tr, descLines, HoveredTooltipPositioner.INSTANCE, descriptionX, descriptionY);
+        tip = Tippy.tip();
+        for (var line : descLines)
+            tip.add(Tippy.line(line).wrapping(170));
+        tippy.add(tip);
     }
 
     @Override
