@@ -2,7 +2,14 @@
     "required": true,
     "package": "dev.tizu.hexcessible.mixin",
     "compatibilityLevel": "JAVA_17",
-    "client": ["DrawStateMixin", "FloatiesMixin", "DimmedMixin"],
+    "client": [
+        "DrawStateMixin",
+        "DrawStateScreenMixin",
+        "DrawStateParentElemMixin",
+        "DrawStateClientPlayerEntityMixin",
+        "FloatiesMixin",
+        "DimmedMixin"
+    ],
     "injectors": {
         "defaultRequire": 1
     },

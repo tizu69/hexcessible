@@ -12,7 +12,7 @@ import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import at.petrak.hexcasting.common.msgs.MsgNewSpellPatternC2S;
 import at.petrak.hexcasting.xplat.IClientXplatAbstractions;
-import dev.tizu.hexcessible.CastingInterfaceAccessor;
+import dev.tizu.hexcessible.accessor.CastingInterfaceAccessor;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec2f;

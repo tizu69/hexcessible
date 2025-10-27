@@ -12,7 +12,7 @@ import net.minecraft.client.gui.DrawContext;
 @Mixin(GuiSpellcasting.class)
 public class DimmedMixin {
 
-    @Inject(at = @At("HEAD"), method = "render", remap = false)
+    @Inject(at = @At("HEAD"), method = "render")
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta,
             CallbackInfo info) {
         if (HexcessibleConfig.get().dimmed)

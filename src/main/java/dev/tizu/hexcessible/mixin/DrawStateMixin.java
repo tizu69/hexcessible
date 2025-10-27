@@ -6,6 +6,7 @@ import java.util.Set;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -17,8 +18,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import at.petrak.hexcasting.api.casting.eval.ResolvedPattern;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
-import dev.tizu.hexcessible.CastingInterfaceAccessor;
 import dev.tizu.hexcessible.HexcessibleConfig;
+import dev.tizu.hexcessible.accessor.CastingInterfaceAccessor;
+import dev.tizu.hexcessible.accessor.DrawStateMixinAccessor;
 import dev.tizu.hexcessible.drawstate.DrawState;
 import dev.tizu.hexcessible.drawstate.DrawState.CastRef;
 import net.minecraft.client.MinecraftClient;
@@ -26,18 +28,20 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.Hand;
 
 @Mixin(GuiSpellcasting.class)
-public class DrawStateMixin {
-    CastingInterfaceAccessor accessor;
-    DrawState state;
+public class DrawStateMixin implements DrawStateMixinAccessor {
+    @Unique
+    private CastingInterfaceAccessor accessor;
+    @Unique
+    private DrawState state;
 
-    @Shadow
+    @Shadow(remap = false)
     private Hand handOpenedWith;
-    @Shadow
+    @Shadow(remap = false)
     private List<ResolvedPattern> patterns;
-    @Shadow
+    @Shadow(remap = false)
     private Set<HexCoord> usedSpots;
 
-    @Inject(at = @At("HEAD"), method = "init", remap = false)
+    @Inject(at = @At("HEAD"), method = "init")
     private void init(CallbackInfo info) {
         var castui = (GuiSpellcasting) (Object) this;
         accessor = new CastingInterfaceAccessor(castui);
@@ -45,17 +49,17 @@ public class DrawStateMixin {
         state = DrawState.getNew(castref);
     }
 
-    @Inject(at = @At("HEAD"), method = "mouseMoved", remap = false)
+    @Inject(at = @At("HEAD"), method = "mouseMoved")
     private void mouseMoved(double mx, double my, CallbackInfo info) {
         state.onMouseMove(mx, my);
     }
 
-    @Inject(at = @At("HEAD"), method = "mouseClicked", remap = false)
+    @Inject(at = @At("HEAD"), method = "mouseClicked")
     private void mouseClicked(double mx, double my, int button, CallbackInfoReturnable<Boolean> info) {
         state.onMousePress(mx, my, button);
     }
 
-    @Inject(at = @At("RETURN"), method = "render", remap = false)
+    @Inject(at = @At("RETURN"), method = "render")
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta,
             CallbackInfo info) {
         if (DrawState.shouldClose(state)) {
@@ -77,6 +81,7 @@ public class DrawStateMixin {
         state.onRender(ctx, mouseX, mouseY);
     }
 
+    @Unique
     private void renderDebug(DrawContext ctx, String text, int i) {
         ctx.drawTextWithShadow(MinecraftClient.getInstance().textRenderer,
                 text, 5, 5 + (i * 10), 0xFFFFFF);
@@ -87,16 +92,8 @@ public class DrawStateMixin {
         return state.allowStartDrawing() && original.call(mxOut, myOut);
     }
 
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == GLFW.GLFW_KEY_ESCAPE)
-            state.requestExit();
-        else
-            state.onKeyPress(keyCode, modifiers);
-        return true;
-    }
-
-    public boolean charTyped(char chr, int modifiers) {
-        state.onCharType(chr);
-        return true;
+    @Override
+    public DrawState state() {
+        return state;
     }
 }

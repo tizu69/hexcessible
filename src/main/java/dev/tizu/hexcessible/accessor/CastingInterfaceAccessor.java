@@ -1,4 +1,4 @@
-package dev.tizu.hexcessible;
+package dev.tizu.hexcessible.accessor;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -6,6 +6,7 @@ import java.lang.invoke.MethodHandles;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
+import dev.tizu.hexcessible.Hexcessible;
 
 public class CastingInterfaceAccessor {
 

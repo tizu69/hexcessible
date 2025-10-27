@@ -2,8 +2,8 @@ package dev.tizu.hexcessible.drawstate;
 
 import java.util.List;
 
-import dev.tizu.hexcessible.CastingInterfaceAccessor;
-import dev.tizu.hexcessible.CastingInterfaceAccessor.State;
+import dev.tizu.hexcessible.accessor.CastingInterfaceAccessor;
+import dev.tizu.hexcessible.accessor.CastingInterfaceAccessor.State;
 import net.minecraft.client.gui.DrawContext;
 
 public final class MouseDrawing extends DrawState {
