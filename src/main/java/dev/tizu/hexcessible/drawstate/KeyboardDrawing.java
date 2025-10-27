@@ -75,11 +75,7 @@ public final class KeyboardDrawing extends DrawState {
                 removeCharFromSig();
                 break;
             case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB, GLFW.GLFW_KEY_SPACE:
-                var start = start();
-                if (start == null)
-                    return;
-                castref.execute(new HexPattern(dir, getAngles()), start);
-                requestExit();
+                submit();
                 break;
             case GLFW.GLFW_KEY_H, GLFW.GLFW_KEY_LEFT:
                 moveOrigin(-1, 0);
@@ -95,6 +91,14 @@ public final class KeyboardDrawing extends DrawState {
                 break;
             default:
         }
+    }
+
+    private void submit() {
+        var start = start();
+        if (start == null)
+            return;
+        castref.execute(new HexPattern(dir, getAngles()), start);
+        requestExit();
     }
 
     private void moveOrigin(int x, int y) {
@@ -194,13 +198,20 @@ public final class KeyboardDrawing extends DrawState {
     }
 
     @Override
+    public void onMouseMove(double mx, double my) {
+        origin = castref.pxToCoord(new Vec2f((int) mx, (int) my));
+    }
+
+    @Override
     public boolean allowStartDrawing() {
         return sig.isEmpty();
     }
 
     @Override
     public void onMousePress(double mx, double my, int button) {
-        if (button == 0)
+        if (button == 1)
             requestExit();
+        if (button == 0)
+            submit();
     }
 }
