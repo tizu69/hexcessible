@@ -11,6 +11,7 @@ import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.render.RenderLib;
+import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.entries.PatternEntries;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;

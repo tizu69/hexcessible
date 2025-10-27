@@ -1,5 +1,7 @@
 package dev.tizu.hexcessible.drawstate;
 
+import dev.tizu.hexcessible.accessor.CastRef;
+
 public final class Idling extends DrawState {
     public Idling(CastRef castref) {
         super(castref);
