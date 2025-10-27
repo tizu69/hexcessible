@@ -3,6 +3,7 @@ package dev.tizu.hexcessible.drawstate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import at.petrak.hexcasting.api.casting.math.HexAngle;
@@ -23,7 +24,8 @@ public final class KeyboardDrawing extends DrawState {
     public static final int COLOR2 = 0xff_fecbe6;
 
     private String sig;
-    private HexCoord start = new HexCoord(0, 0);
+    private HexCoord origin = new HexCoord(0, 0);
+    private HexDir dir = HexDir.EAST;
 
     public KeyboardDrawing(CastRef castref, String sig) {
         super(castref);
@@ -33,7 +35,19 @@ public final class KeyboardDrawing extends DrawState {
     public KeyboardDrawing(CastRef castref, String sig, HexCoord start) {
         super(castref);
         this.sig = sig;
-        this.start = start;
+        this.origin = start;
+    }
+
+    @Nullable
+    private HexCoord start() {
+        if (sig.isEmpty())
+            return origin;
+        var mutated = castref.findClosestAvailable(origin,
+                new HexPattern(HexDir.EAST, getAngles()));
+        if (mutated == null)
+            return null;
+        dir = mutated.startDir();
+        return mutated.coord();
     }
 
     @Override
@@ -59,8 +73,23 @@ public final class KeyboardDrawing extends DrawState {
                 removeCharFromSig();
                 break;
             case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB, GLFW.GLFW_KEY_SPACE:
-                castref.execute(new HexPattern(HexDir.EAST, getAngles()), start);
+                var start = start();
+                if (start == null)
+                    return;
+                castref.execute(new HexPattern(dir, getAngles()), start);
                 requestExit();
+                break;
+            case GLFW.GLFW_KEY_H, GLFW.GLFW_KEY_LEFT:
+                origin = origin.plus(new HexCoord(-1, 0));
+                break;
+            case GLFW.GLFW_KEY_J, GLFW.GLFW_KEY_DOWN:
+                origin = origin.plus(new HexCoord(0, 1));
+                break;
+            case GLFW.GLFW_KEY_K, GLFW.GLFW_KEY_UP:
+                origin = origin.plus(new HexCoord(0, -1));
+                break;
+            case GLFW.GLFW_KEY_L, GLFW.GLFW_KEY_RIGHT:
+                origin = origin.plus(new HexCoord(1, 0));
                 break;
             default:
         }
@@ -74,8 +103,12 @@ public final class KeyboardDrawing extends DrawState {
 
     public void renderPattern(DrawContext ctx) {
         var mat = ctx.getMatrices().peek().getPositionMatrix();
-        var pat = new HexPattern(HexDir.EAST, getAngles());
+        var pat = new HexPattern(dir, getAngles());
         var duplicates = RenderLib.findDupIndices(pat.positions());
+
+        var start = start();
+        if (start == null)
+            return;
 
         var points = new ArrayList<Vec2f>();
         for (var c : pat.positions())
@@ -85,6 +118,24 @@ public final class KeyboardDrawing extends DrawState {
 
         RenderLib.drawPatternFromPoints(mat, points, duplicates, false, COLOR1,
                 COLOR2, 0.1f, RenderLib.DEFAULT_READABILITY_OFFSET, 1f, 0);
+
+        drawLine(ctx, origin, start);
+        RenderLib.drawSpot(mat, castref.coordToPx(origin), 6f, 1f, 0f, 0f, 1f);
+        RenderLib.drawSpot(mat, castref.coordToPx(start), 6f, 0f, 0f, 1f, 1f);
+    }
+
+    private void drawLine(DrawContext ctx, HexCoord start, HexCoord end) {
+        var startpx = castref.coordToPx(start);
+        var endpx = castref.coordToPx(end);
+        var dx = endpx.x - startpx.x;
+        var dy = endpx.y - startpx.y;
+        var length = Math.sqrt(dx * dx + dy * dy);
+        var steps = (int) Math.ceil(length / 2);
+        for (var i = 0; i < steps; i++) {
+            var x = startpx.x + dx * i / steps;
+            var y = startpx.y + dy * i / steps;
+            ctx.fill((int) x, (int) y, (int) x + 2, (int) y + 2, COLOR2);
+        }
     }
 
     public List<HexAngle> getAngles() {

@@ -3,7 +3,6 @@ package dev.tizu.hexcessible.mixin;
 import java.util.List;
 import java.util.Set;
 
-import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
