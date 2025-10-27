@@ -1,5 +1,6 @@
 package dev.tizu.hexcessible.drawstate;
 
+import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.accessor.CastRef;
 
 public final class Idling extends DrawState {
@@ -14,7 +15,22 @@ public final class Idling extends DrawState {
 
     @Override
     public void onCharType(char chr) {
-        if (KeyboardDrawing.validSig.contains(chr))
+        if (Hexcessible.cfg().keyboardDraw.allow
+                && KeyboardDrawing.validSig.contains(chr))
             nextState = new KeyboardDrawing(castref, String.valueOf(chr));
     }
+
+    /*
+     * @Override
+     * public void onRender(DrawContext ctx, int mx, int my) {
+     * var allDrawMethodsDisabled = !Hexcessible.cfg().keyboardDraw.allow
+     * && !Hexcessible.cfg().mouseDraw.allow
+     * && !Hexcessible.cfg().autoComplete.allow;
+     * var tr = MinecraftClient.getInstance().textRenderer;
+     * if (allDrawMethodsDisabled)
+     * ctx.drawCenteredTextWithShadow(tr,
+     * Text.translatable("hexcessible.no_draw_methods"),
+     * ctx.getScaledWindowWidth() / 2, ctx.getScaledWindowHeight() / 2, 16733525);
+     * }
+     */
 }

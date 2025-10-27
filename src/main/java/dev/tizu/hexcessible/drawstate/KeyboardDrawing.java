@@ -12,6 +12,7 @@ import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.render.RenderLib;
 import dev.tizu.hexcessible.Hexcessible;
+import dev.tizu.hexcessible.HexcessibleConfig;
 import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.entries.PatternEntries;
 import net.minecraft.client.MinecraftClient;
@@ -57,11 +58,14 @@ public final class KeyboardDrawing extends DrawState {
         if (sig.isEmpty())
             requestExit();
         renderPattern(ctx);
-        KeyboardDrawing.render(ctx, mx, my, sig, "␣⇥↩", start() == null);
+        KeyboardDrawing.render(ctx, mx, my, sig, "␣⇥↩", start() == null,
+                Hexcessible.cfg().keyboardDraw.tooltip);
     }
 
     @Override
     public void onCharType(char chr) {
+        if (!Hexcessible.cfg().keyboardDraw.allow)
+            return;
         if (chr == 's') // go back
             removeCharFromSig();
         else if (validSig.contains(chr)) // valid
@@ -108,6 +112,8 @@ public final class KeyboardDrawing extends DrawState {
     }
 
     private void removeCharFromSig() {
+        if (!Hexcessible.cfg().keyboardDraw.allow)
+            requestExit();
         if (sig.isEmpty())
             return;
         sig = sig.substring(0, sig.length() - 1);
@@ -168,10 +174,10 @@ public final class KeyboardDrawing extends DrawState {
     }
 
     public static void render(DrawContext ctx, int mx, int my, String pattern,
-            String submitKeys, boolean failed) {
+            String submitKeys, boolean failed, HexcessibleConfig.Tooltip tooltip) {
         var y = my;
         var tr = MinecraftClient.getInstance().textRenderer;
-        if (pattern.isEmpty())
+        if (pattern.isEmpty() || !tooltip.visible())
             return;
 
         var text = Text.literal(pattern);
@@ -188,7 +194,7 @@ public final class KeyboardDrawing extends DrawState {
         }
 
         var entry = PatternEntries.INSTANCE.getFromSig(pattern);
-        if (entry == null)
+        if (entry == null || !tooltip.descriptive())
             return;
         var subtext = new ArrayList<Text>();
         subtext.add(Text.literal(entry.toString()).formatted(Formatting.BLUE));

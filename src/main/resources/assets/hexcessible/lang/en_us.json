@@ -2,6 +2,7 @@
     "hexcessible.start_typing": "Start typing...",
     "hexcessible.count_locked": "+%s locked",
     "hexcessible.no_space": "Can't place this here",
+    "hexcessible.no_draw_methods": "All methods of drawing are disabled. Please enable at least one to cast spells.",
 
     "text.autoconfig.hexcessible.title": "Hexcessible Config",
     "text.autoconfig.hexcessible.option.debug": "Debug Mode",
@@ -11,7 +12,16 @@
     "text.autoconfig.hexcessible.option.hideFloaties.@Tooltip": "Hide the patterns shown around the player when casting spells",
     "text.autoconfig.hexcessible.option.showAllDots": "Show all dots",
     "text.autoconfig.hexcessible.option.showAllDots.@Tooltip": "Show all dots in the spellcasting interface, instead of just the ones close to your cursor",
-    "text.autoconfig.hexcessible.option.inspectMouse.@PrefixText": "Inspect Drawing",
-    "text.autoconfig.hexcessible.option.inspectMouse": "Mouse",
-    "text.autoconfig.hexcessible.option.inspectMouse.@Tooltip": "Show details about the pattern you're drawing if you hold still"
+    "text.autoconfig.hexcessible.option.mouseDraw": "Show tooltip while Spellcasting with Mouse",
+    "text.autoconfig.hexcessible.option.keyboardDraw": "Spellcasting with Keyboard",
+    "text.autoconfig.hexcessible.option.keyboardDraw.allow": "Enable",
+    "text.autoconfig.hexcessible.option.keyboardDraw.tooltip": "Show tooltip",
+    "text.autoconfig.hexcessible.option.autoComplete": "Magic Autocomplete",
+    "text.autoconfig.hexcessible.option.autoComplete.allow": "Enable",
+    "text.autoconfig.hexcessible.option.autoComplete.tooltip": "Show description panel",
+    "text.autoconfig.hexcessible.option.autoComplete.count": "Option count",
+    "text.autoconfig.hexcessible.option.autoComplete.count.@Tooltip": "Number of options to show on one page",
+    "text.autoconfig.hexcessible.enum.tooltip.HIDDEN": "§cNo",
+    "text.autoconfig.hexcessible.enum.tooltip.SIMPLE": "Simple",
+    "text.autoconfig.hexcessible.enum.tooltip.DESCRIPTIVE": "Descriptive"
 }

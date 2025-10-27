@@ -88,7 +88,9 @@ public class DrawStateMixin implements DrawStateMixinAccessor {
 
     @WrapMethod(method = "drawStart", remap = false)
     private boolean drawStart(double mxOut, double myOut, Operation<Boolean> original) {
-        return state.allowStartDrawing() && original.call(mxOut, myOut);
+        if (!state.allowStartDrawing())
+            return false;
+        return original.call(mxOut, myOut);
     }
 
     @Override

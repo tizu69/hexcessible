@@ -1,7 +1,6 @@
 package dev.tizu.hexcessible.drawstate;
 
-import java.util.List;
-
+import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.accessor.CastingInterfaceAccessor;
 import dev.tizu.hexcessible.accessor.CastingInterfaceAccessor.State;
@@ -9,7 +8,6 @@ import net.minecraft.client.gui.DrawContext;
 
 public final class MouseDrawing extends DrawState {
     private CastingInterfaceAccessor accessor;
-    private long lastMouseMoved = 0;
 
     public MouseDrawing(CastRef castref, CastingInterfaceAccessor accessor) {
         super(castref);
@@ -17,23 +15,11 @@ public final class MouseDrawing extends DrawState {
     }
 
     @Override
-    public void onMouseMove(double mx, double my) {
-        lastMouseMoved = System.currentTimeMillis();
-    }
-
-    @Override
     public void onRender(DrawContext ctx, int mx, int my) {
-        if (lastMouseMoved + 500 > System.currentTimeMillis() ||
-                accessor.getState() != State.DRAWING)
+        if (accessor.getState() != State.DRAWING)
             return;
         var sig = accessor.getPattern().anglesSignature();
-        KeyboardDrawing.render(ctx, mx, my, sig, "", false);
-    }
-
-    @Override
-    public List<String> getDebugInfo() {
-        var moveMs = (System.currentTimeMillis() - lastMouseMoved);
-        var moveDebug = "Last move: " + (moveMs > 2000 ? ">2000ms" : moveMs + "ms");
-        return List.of(moveDebug);
+        KeyboardDrawing.render(ctx, mx, my, sig, "", false,
+                Hexcessible.cfg().mouseDraw);
     }
 }

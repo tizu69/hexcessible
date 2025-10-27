@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 import org.lwjgl.glfw.GLFW;
 
 import at.petrak.hexcasting.api.casting.math.HexCoord;
+import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.entries.PatternEntries;
 import net.minecraft.client.MinecraftClient;
@@ -56,9 +57,9 @@ public final class AutoCompleting extends DrawState {
 
     @Override
     public void onKeyPress(int keyCode, int modifiers) {
-        lastInteractWasMouse = false;
         if (noDistract())
             return; // if no options are shown, no need to provide opt controls.
+        lastInteractWasMouse = false;
         var ctrl = (modifiers & GLFW.GLFW_MOD_CONTROL) != 0;
         switch (keyCode) {
             case GLFW.GLFW_KEY_BACKSPACE:
@@ -111,6 +112,8 @@ public final class AutoCompleting extends DrawState {
     }
 
     private void setQuery(String query) {
+        if (!Hexcessible.cfg().autoComplete.allow)
+            return;
         this.query = query;
         optsWithLocked = PatternEntries.INSTANCE.get(query);
         opts = new ArrayList<>(optsWithLocked);
@@ -132,6 +135,8 @@ public final class AutoCompleting extends DrawState {
 
     @Override
     public void onRender(DrawContext ctx, int mx, int my) {
+        if (!Hexcessible.cfg().autoComplete.allow)
+            return;
         var x = (int) anchor.x;
         var y = (int) anchor.y;
         renderQueryTooltip(ctx, x, y, mx, my);
@@ -162,8 +167,10 @@ public final class AutoCompleting extends DrawState {
     }
 
     private List<Text> prepareOptions() {
-        var optsStart = Math.max(0, Math.min(chosen - 2, opts.size() - 7));
-        var optsEnd = Math.min(opts.size(), optsStart + 7);
+        var count = Hexcessible.cfg().autoComplete.count;
+        var previs = count < 3 ? 0 : 2; // amount of options to show above chosen
+        var optsStart = Math.max(0, Math.min(chosen - previs, opts.size() - count));
+        var optsEnd = Math.min(opts.size(), optsStart + count);
         List<Text> options = IntStream.range(optsStart, optsEnd)
                 .mapToObj(i -> {
                     var picked = i == chosen;
@@ -179,14 +186,29 @@ public final class AutoCompleting extends DrawState {
     }
 
     private List<OrderedText> prepareDescription() {
-        var tr = MinecraftClient.getInstance().textRenderer;
-        var opt = opts.get(chosen);
-        if (chosenDoc >= opt.impls().size())
+        if (!Hexcessible.cfg().autoComplete.tooltip.visible())
             return List.of();
 
+        var tr = MinecraftClient.getInstance().textRenderer;
+        var opt = opts.get(chosen);
+
+        if (!Hexcessible.cfg().autoComplete.tooltip.descriptive()) {
+            var text = Text.empty().formatted(Formatting.DARK_GRAY);
+            var first = true;
+            for (var impl : opt.impls()) {
+                if (first)
+                    first = false;
+                else
+                    text.append(Text.literal("\n"));
+                text.append(Text.literal(impl.getArgs()));
+            }
+            return tr.wrapLines(text, 170);
+        }
+
+        if (chosenDoc >= opt.impls().size())
+            return List.of();
         var docN = "[" + (chosenDoc + 1) + "/" + opt.impls().size() + "]";
         var impl = opt.impls().get(chosenDoc);
-
         var description = Text.literal(docN + " " + impl.getArgs()).formatted(Formatting.GRAY)
                 .append(Text.literal("\n" + impl.getDesc()).formatted(Formatting.DARK_GRAY));
 
