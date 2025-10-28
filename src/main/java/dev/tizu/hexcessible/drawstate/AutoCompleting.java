@@ -50,6 +50,10 @@ public final class AutoCompleting extends DrawState {
         opts.removeIf(PatternEntries.Entry::locked);
     }
 
+    public AutoCompleting(CastRef castref) {
+        this(castref, new HexCoord(0, 0));
+    }
+
     @Override
     public void onCharType(char chr) {
         setQuery(query + chr);

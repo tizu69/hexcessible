@@ -1,5 +1,7 @@
 package dev.tizu.hexcessible.drawstate;
 
+import org.lwjgl.glfw.GLFW;
+
 import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.accessor.CastRef;
 
@@ -18,6 +20,14 @@ public final class Idling extends DrawState {
         if (Hexcessible.cfg().keyboardDraw.allow
                 && KeyboardDrawing.validSig.contains(chr))
             nextState = new KeyboardDrawing(castref, String.valueOf(chr));
+    }
+
+    @Override
+    public void onKeyPress(int keyCode, int modifiers) {
+        var ctrl = (modifiers & GLFW.GLFW_MOD_CONTROL) != 0;
+        if (keyCode == GLFW.GLFW_KEY_SPACE && ctrl
+                && Hexcessible.cfg().autoComplete.allow)
+            nextState = new AutoCompleting(castref);
     }
 
     /*
