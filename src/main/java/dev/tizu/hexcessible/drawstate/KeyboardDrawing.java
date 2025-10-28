@@ -15,6 +15,7 @@ import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.HexcessibleConfig;
 import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.entries.PatternEntries;
+import kotlin.Pair;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
@@ -53,11 +54,28 @@ public final class KeyboardDrawing extends DrawState {
         return mutated.coord();
     }
 
+    private @Nullable Pair<HexCoord, HexDir> end() {
+        // TODO: once we use HexPattern directly in KeyboardDrawing, this can
+        // just make use of the internal .endPosition (?) function
+        var point = start();
+        if (point == null)
+            return null;
+        var dir = this.dir;
+        point = point.plus(dir);
+        for (var angle : getAngles()) {
+            dir = dir.rotatedBy(angle);
+            point = point.plus(dir);
+        }
+        return new Pair<>(point, dir);
+    }
+
     @Override
     public void onRender(DrawContext ctx, int mx, int my) {
         if (sig.isEmpty())
             requestExit();
         renderPattern(ctx);
+        if (Hexcessible.cfg().keyboardDraw.keyHint)
+            renderNextPointTooltips(ctx);
         KeyboardDrawing.render(ctx, mx, my, sig, "␣⇥↩", start() == null,
                 Hexcessible.cfg().keyboardDraw.tooltip);
     }
@@ -142,6 +160,38 @@ public final class KeyboardDrawing extends DrawState {
         drawLine(ctx, origin, start);
         RenderLib.drawSpot(mat, castref.coordToPx(start), 6f, 0f, 0f, 1f, 1f);
         RenderLib.drawSpot(mat, castref.coordToPx(origin), 6f, 0f, 1f, 0f, 1f);
+    }
+
+    private void renderNextPointTooltips(DrawContext ctx) {
+        var end = end();
+        if (end == null)
+            return;
+        var point = end.getFirst();
+        var dir = end.getSecond();
+
+        var tr = MinecraftClient.getInstance().textRenderer;
+        for (var angle : HexAngle.values()) {
+            var pos = point.plus(dir.rotatedBy(angle));
+            if (castref.isUsed(pos)) // TODO: don't show illegal (double) moves
+                continue;
+            var charstr = angleAsCharStr(angle);
+            if (charstr == null)
+                continue;
+            var px = castref.coordToPx(pos);
+            ctx.drawCenteredTextWithShadow(tr, Text.literal(charstr),
+                    (int) px.x + 1, (int) px.y - 5, 0xff_A8A8A8);
+        }
+    }
+
+    private static @Nullable String angleAsCharStr(HexAngle angle) {
+        return switch (angle) {
+            case LEFT -> "Q";
+            case FORWARD -> "W";
+            case RIGHT -> "E";
+            case LEFT_BACK -> "A";
+            case RIGHT_BACK -> "D";
+            default -> null;
+        };
     }
 
     private void drawLine(DrawContext ctx, HexCoord start, HexCoord end) {

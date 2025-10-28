@@ -59,15 +59,12 @@ public class KeyDocsScreenMixin {
 
     @Unique
     boolean openHexbookEntry(HexPattern pat, int keycode, int modifiers) {
-        Hexcessible.LOGGER.debug("Pattern ref: {}", pat);
         if (pat == null)
             return false;
         var ptrn = PatternEntries.INSTANCE.getFromSig(pat.anglesSignature());
-        Hexcessible.LOGGER.debug("Pattern: {}", ptrn);
         if (ptrn == null)
             return false;
         var entry = BookEntries.INSTANCE.getBookEntryFor(ptrn.id().toString());
-        Hexcessible.LOGGER.debug("Entry: {}", entry);
         if (entry == null)
             return false;
         PatchouliAPI.get().openBookEntry(BookEntries.BOOKID,

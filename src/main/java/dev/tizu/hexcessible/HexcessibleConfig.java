@@ -43,6 +43,8 @@ public class HexcessibleConfig implements ConfigData {
         public boolean allow = true;
         @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
         public ForcedTooltip tooltip = ForcedTooltip.DESCRIPTIVE;
+        @ConfigEntry.Gui.Tooltip
+        public boolean keyHint = false;
     }
 
     public static class AutoComplete {
