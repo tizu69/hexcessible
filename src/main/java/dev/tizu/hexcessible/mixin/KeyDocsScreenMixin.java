@@ -61,7 +61,7 @@ public class KeyDocsScreenMixin {
     boolean openHexbookEntry(HexPattern pat, int keycode, int modifiers) {
         if (pat == null)
             return false;
-        var ptrn = PatternEntries.INSTANCE.getFromSig(pat.anglesSignature());
+        var ptrn = PatternEntries.INSTANCE.getFromSig(pat.getAngles());
         if (ptrn == null)
             return false;
         var entry = BookEntries.INSTANCE.getBookEntryFor(ptrn.id().toString());

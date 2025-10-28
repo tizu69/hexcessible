@@ -13,6 +13,7 @@ import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.render.RenderLib;
 import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.HexcessibleConfig;
+import dev.tizu.hexcessible.Utils;
 import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.entries.PatternEntries;
 import kotlin.Pair;
@@ -27,18 +28,17 @@ public final class KeyboardDrawing extends DrawState {
     public static final int COLOR1 = 0xff_64c8ff;
     public static final int COLOR2 = 0xff_fecbe6;
 
-    private String sig;
-    private HexCoord origin = new HexCoord(0, 0);
-    private HexDir dir = HexDir.EAST;
+    private List<HexAngle> sig;
+    private HexCoord origin;
+    private HexDir startDir = HexDir.EAST;
 
-    public KeyboardDrawing(CastRef castref, String sig) {
-        super(castref);
-        this.sig = sig;
+    public KeyboardDrawing(CastRef castref, List<HexAngle> sig) {
+        this(castref, sig, new HexCoord(0, 0));
     }
 
-    public KeyboardDrawing(CastRef castref, String sig, HexCoord start) {
+    public KeyboardDrawing(CastRef castref, List<HexAngle> sig, HexCoord start) {
         super(castref);
-        this.sig = sig;
+        this.sig = new ArrayList<>(sig);
         this.origin = start;
     }
 
@@ -47,26 +47,19 @@ public final class KeyboardDrawing extends DrawState {
         if (sig.isEmpty())
             return origin;
         var mutated = castref.findClosestAvailable(origin,
-                new HexPattern(HexDir.EAST, getAngles()));
+                new HexPattern(HexDir.EAST, sig));
         if (mutated == null)
             return null;
-        dir = mutated.startDir();
+        startDir = mutated.startDir();
         return mutated.coord();
     }
 
     private @Nullable Pair<HexCoord, HexDir> end() {
-        // TODO: once we use HexPattern directly in KeyboardDrawing, this can
-        // just make use of the internal .endPosition (?) function
-        var point = start();
-        if (point == null)
+        var start = start();
+        if (start == null)
             return null;
-        var dir = this.dir;
-        point = point.plus(dir);
-        for (var angle : getAngles()) {
-            dir = dir.rotatedBy(angle);
-            point = point.plus(dir);
-        }
-        return new Pair<>(point, dir);
+        var pat = new HexPattern(startDir, sig);
+        return new Pair<>(Utils.finalPos(start, pat), pat.finalDir());
     }
 
     @Override
@@ -86,8 +79,9 @@ public final class KeyboardDrawing extends DrawState {
             return;
         if (chr == 's') // go back
             removeCharFromSig();
-        else if (validSig.contains(chr)) // valid
-            sig += chr;
+        else if (validSig.contains(chr)
+                && canGo(Utils.charToAngle(chr))) // valid
+            sig.add(Utils.charToAngle(chr));
     }
 
     @Override
@@ -119,7 +113,7 @@ public final class KeyboardDrawing extends DrawState {
         var start = start();
         if (start == null)
             return;
-        castref.execute(new HexPattern(dir, getAngles()), start);
+        castref.execute(new HexPattern(startDir, sig), start);
         requestExit();
     }
 
@@ -134,12 +128,12 @@ public final class KeyboardDrawing extends DrawState {
             requestExit();
         if (sig.isEmpty())
             return;
-        sig = sig.substring(0, sig.length() - 1);
+        sig.remove(sig.size() - 1);
     }
 
     public void renderPattern(DrawContext ctx) {
         var mat = ctx.getMatrices().peek().getPositionMatrix();
-        var pat = new HexPattern(dir, getAngles());
+        var pat = new HexPattern(startDir, sig);
         var duplicates = RenderLib.findDupIndices(pat.positions());
 
         var start = start();
@@ -173,14 +167,17 @@ public final class KeyboardDrawing extends DrawState {
         for (var angle : HexAngle.values()) {
             var pos = point.plus(dir.rotatedBy(angle));
             var charstr = angleAsCharStr(angle);
-            if (castref.isUsed(pos) || !castref.isValidPatternAddition(
-                    new HexPattern(this.dir, getAngles()), angle)
-                    || charstr == null)
+            if (castref.isUsed(pos) || !canGo(angle) || charstr == null)
                 continue;
             var px = castref.coordToPx(pos);
             ctx.drawCenteredTextWithShadow(tr, Text.literal(charstr),
                     (int) px.x + 1, (int) px.y - 5, 0xff_A8A8A8);
         }
+    }
+
+    private boolean canGo(HexAngle angle) {
+        var pat = new HexPattern(this.startDir, new ArrayList<>(sig));
+        return castref.isValidPatternAddition(pat, angle);
     }
 
     private static @Nullable String angleAsCharStr(HexAngle angle) {
@@ -208,29 +205,13 @@ public final class KeyboardDrawing extends DrawState {
         }
     }
 
-    public List<HexAngle> getAngles() {
-        var angles = new ArrayList<HexAngle>();
-        for (var c : sig.chars().toArray()) {
-            angles.add(switch (c) {
-                case 'q' -> HexAngle.LEFT;
-                case 'w' -> HexAngle.FORWARD;
-                case 'e' -> HexAngle.RIGHT;
-                case 'a' -> HexAngle.LEFT_BACK;
-                case 'd' -> HexAngle.RIGHT_BACK;
-                default -> throw new IllegalStateException(c + " invalid");
-            });
-        }
-        return angles;
-    }
-
-    public static void render(DrawContext ctx, int mx, int my, String pattern,
+    public static void render(DrawContext ctx, int mx, int y, List<HexAngle> sig,
             String submitKeys, boolean failed, HexcessibleConfig.Tooltip tooltip) {
-        var y = my;
         var tr = MinecraftClient.getInstance().textRenderer;
-        if (pattern.isEmpty() || !tooltip.visible())
+        if (sig.isEmpty() || !tooltip.visible())
             return;
 
-        var text = Text.literal(pattern);
+        var text = Text.literal(Utils.anglesAsStr(sig));
         if (!submitKeys.isEmpty() && !failed)
             text = text.append(Text.literal(" " + submitKeys)
                     .formatted(Formatting.DARK_GRAY));
@@ -243,7 +224,7 @@ public final class KeyboardDrawing extends DrawState {
             y += 17;
         }
 
-        var entry = PatternEntries.INSTANCE.getFromSig(pattern);
+        var entry = PatternEntries.INSTANCE.getFromSig(sig);
         if (entry == null || !tooltip.descriptive())
             return;
         var subtext = new ArrayList<Text>();

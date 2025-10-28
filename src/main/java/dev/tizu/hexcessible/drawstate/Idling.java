@@ -1,8 +1,11 @@
 package dev.tizu.hexcessible.drawstate;
 
+import java.util.List;
+
 import org.lwjgl.glfw.GLFW;
 
 import dev.tizu.hexcessible.Hexcessible;
+import dev.tizu.hexcessible.Utils;
 import dev.tizu.hexcessible.accessor.CastRef;
 
 public final class Idling extends DrawState {
@@ -19,7 +22,7 @@ public final class Idling extends DrawState {
     public void onCharType(char chr) {
         if (Hexcessible.cfg().keyboardDraw.allow
                 && KeyboardDrawing.validSig.contains(chr))
-            nextState = new KeyboardDrawing(castref, String.valueOf(chr));
+            nextState = new KeyboardDrawing(castref, List.of(Utils.charToAngle(chr)));
     }
 
     @Override

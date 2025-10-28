@@ -1,5 +1,11 @@
 package dev.tizu.hexcessible;
 
+import java.util.List;
+
+import at.petrak.hexcasting.api.casting.math.HexAngle;
+import at.petrak.hexcasting.api.casting.math.HexCoord;
+import at.petrak.hexcasting.api.casting.math.HexPattern;
+
 public class Utils {
     private Utils() {
     }
@@ -28,5 +34,37 @@ public class Utils {
         if (!candidate.isEmpty() && candidate.toLowerCase().startsWith(q))
             score += 15;
         return qi == q.length() ? score : 0;
+    }
+
+    public static HexCoord finalPos(HexCoord start, HexPattern pattern) {
+        var dir = pattern.getStartDir();
+        start = start.plus(dir);
+        for (var angle : pattern.getAngles()) {
+            dir = dir.rotatedBy(angle);
+            start = start.plus(dir);
+        }
+        return start;
+    }
+
+    public static HexAngle charToAngle(char c) {
+        return switch (c) {
+            case 'q' -> HexAngle.LEFT;
+            case 'w' -> HexAngle.FORWARD;
+            case 'e' -> HexAngle.RIGHT;
+            case 'a' -> HexAngle.LEFT_BACK;
+            case 'd' -> HexAngle.RIGHT_BACK;
+            default -> throw new IllegalStateException(c + " invalid");
+        };
+    }
+
+    public static String anglesAsStr(List<HexAngle> angles) {
+        return angles.stream().map(s -> switch (s) {
+            case LEFT -> "Q";
+            case FORWARD -> "W";
+            case RIGHT -> "E";
+            case LEFT_BACK -> "A";
+            case BACK -> "S";
+            case RIGHT_BACK -> "D";
+        }).reduce("", String::concat);
     }
 }

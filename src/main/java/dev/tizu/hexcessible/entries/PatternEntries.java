@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.Nullable;
 
 import at.petrak.hexcasting.api.HexAPI;
+import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
 import dev.tizu.hexcessible.Utils;
@@ -30,8 +31,8 @@ public class PatternEntries {
             var id = key.getValue();
             var name = Text.translatable(HexAPI.instance().getActionI18nKey(key)).getString();
             Supplier<Boolean> checkLock = () -> BookEntries.INSTANCE.isLocked(id.toString());
-            var dir = item.prototype().component1();
-            var sig = item.prototype().anglesSignature();
+            var dir = item.prototype().getStartDir();
+            var sig = item.prototype().getAngles();
             var impls = BookEntries.INSTANCE.get(id);
             entries.add(new Entry(id, name, checkLock, dir, sig, impls));
         });
@@ -60,7 +61,7 @@ public class PatternEntries {
                 .toList();
     }
 
-    public @Nullable Entry getFromSig(String sig) {
+    public @Nullable Entry getFromSig(List<HexAngle> sig) {
         return entries.stream()
                 .filter(e -> e.sig.equals(sig))
                 .findFirst()
@@ -68,13 +69,14 @@ public class PatternEntries {
     }
 
     public static record Entry(Identifier id, String name, Supplier<Boolean> checkLock,
-            HexDir dir, String sig, List<BookEntries.Entry> impls) {
+            HexDir dir, List<HexAngle> sig, List<BookEntries.Entry> impls) {
         public boolean locked() {
             return checkLock.get();
         }
 
         public String toString() {
-            return "<" + dir + "," + sig + "> " + name;
+            return "<" + dir + "," + Utils.anglesAsStr(sig).toLowerCase()
+                    + "> " + name;
         }
     }
 }
