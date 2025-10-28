@@ -171,7 +171,7 @@ public final class KeyboardDrawing extends DrawState {
                 continue;
             var px = castref.coordToPx(pos);
             ctx.drawCenteredTextWithShadow(tr, Text.literal(charstr),
-                    (int) px.x + 1, (int) px.y - 5, 0xff_A8A8A8);
+                    (int) px.x + 1, (int) px.y - 10, 0xff_A8A8A8);
         }
     }
 
