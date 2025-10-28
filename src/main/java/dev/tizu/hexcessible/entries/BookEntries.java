@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.JsonSyntaxException;
 
@@ -39,31 +42,35 @@ public class BookEntries {
 
         var entries = new ArrayList<Entry>();
         var locked = new HashMap<String, Supplier<Boolean>>();
-        book.getContents().entries.forEach((entryid, entry) -> entry.getPages().forEach(page -> {
-            var root = page.sourceObject;
-            if (root == null)
-                return;
-            try {
-                var type = JsonHelper.getString(root, "type");
-                if (!type.equals("hexcasting:pattern"))
+        book.getContents().entries.forEach((entryid, entry) -> {
+            var pagei = new AtomicInteger(0);
+            entry.getPages().forEach(page -> {
+                var root = page.sourceObject;
+                if (root == null)
                     return;
-                var id = JsonHelper.getString(root, "op_id");
-                if (!locked.containsKey(id))
-                    locked.put(id, entry::isLocked);
-                var desc = JsonHelper.getString(root, "text", "");
-                var in = JsonHelper.getString(root, "input", "");
-                var out = JsonHelper.getString(root, "output", "");
-                entries.add(new Entry(id, entryid, desc, in, out));
-            } catch (JsonSyntaxException e) {
-                Hexcessible.LOGGER.error("Failed to parse entry {}", entryid, e);
-            }
-        }));
+                try {
+                    var type = JsonHelper.getString(root, "type");
+                    if (!type.equals("hexcasting:pattern"))
+                        return;
+                    var id = JsonHelper.getString(root, "op_id");
+                    if (!locked.containsKey(id))
+                        locked.put(id, entry::isLocked);
+                    var desc = JsonHelper.getString(root, "text", "");
+                    var in = JsonHelper.getString(root, "input", "");
+                    var out = JsonHelper.getString(root, "output", "");
+                    entries.add(new Entry(id, entryid, desc, in, out,
+                            pagei.getAndIncrement()));
+                } catch (JsonSyntaxException e) {
+                    Hexcessible.LOGGER.error("Failed to parse entry {}", entryid, e);
+                }
+            });
+        });
         this.entries = entries;
         this.locked = locked;
     }
 
     public static record Entry(String id, Identifier entryid,
-            String desc, String in, String out) {
+            String desc, String in, String out, int page) {
         public String getArgs() {
             return (in + " -> " + out).strip();
         }
@@ -86,5 +93,13 @@ public class BookEntries {
 
     public boolean isLocked(String id) {
         return locked.getOrDefault(id, () -> false).get();
+    }
+
+    @Nullable
+    public Entry getBookEntryFor(String id) {
+        return entries.stream()
+                .filter(e -> e.id.equals(id))
+                .findFirst()
+                .orElse(null);
     }
 }

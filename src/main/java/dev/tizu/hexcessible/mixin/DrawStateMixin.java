@@ -3,6 +3,7 @@ package dev.tizu.hexcessible.mixin;
 import java.util.List;
 import java.util.Set;
 
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -16,6 +17,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 
 import at.petrak.hexcasting.api.casting.eval.ResolvedPattern;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
+import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.accessor.CastRef;
@@ -25,6 +27,7 @@ import dev.tizu.hexcessible.drawstate.DrawState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.Vec2f;
 
 @Mixin(GuiSpellcasting.class)
 public class DrawStateMixin implements DrawStateMixinAccessor {
@@ -96,5 +99,18 @@ public class DrawStateMixin implements DrawStateMixinAccessor {
     @Override
     public DrawState state() {
         return state;
+    }
+
+    @Override
+    public @Nullable HexPattern getPatternAt(int x, int y) {
+        var coord = ((GuiSpellcasting) (Object) this).pxToCoord(new Vec2f(x, y));
+        return patterns.stream()
+                .filter(p -> p.getOrigin().equals(coord)
+                        || p.getPattern().positions().stream()
+                                .map(pt -> pt.plus(p.getOrigin()))
+                                .anyMatch(pt -> pt.equals(coord)))
+                .findFirst()
+                .map(ResolvedPattern::getPattern)
+                .orElse(null);
     }
 }

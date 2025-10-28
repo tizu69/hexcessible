@@ -9,7 +9,8 @@
         "DrawStateClientPlayerEntityMixin",
         "FloatiesMixin",
         "DimmedMixin",
-        "ShowAllDotsMixin"
+        "ShowAllDotsMixin",
+        "KeyDocsScreenMixin"
     ],
     "injectors": {
         "defaultRequire": 1

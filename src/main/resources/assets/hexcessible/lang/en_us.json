@@ -12,6 +12,8 @@
     "text.autoconfig.hexcessible.option.hideFloaties.@Tooltip": "Hide the patterns shown around the player when casting spells",
     "text.autoconfig.hexcessible.option.showAllDots": "Show all dots",
     "text.autoconfig.hexcessible.option.showAllDots.@Tooltip": "Show all dots in the spellcasting interface, instead of just the ones close to your cursor",
+    "text.autoconfig.hexcessible.option.keyDocs": "N for Docs",
+    "text.autoconfig.hexcessible.option.keyDocs.@Tooltip": "Press the N key while casting to open the book",
     "text.autoconfig.hexcessible.option.mouseDraw": "Show tooltip while Spellcasting with Mouse",
     "text.autoconfig.hexcessible.option.keyboardDraw": "Spellcasting with Keyboard",
     "text.autoconfig.hexcessible.option.keyboardDraw.allow": "Enable",

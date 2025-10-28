@@ -60,8 +60,7 @@ public class PatternEntries {
                 .toList();
     }
 
-    @Nullable
-    public Entry getFromSig(String sig) {
+    public @Nullable Entry getFromSig(String sig) {
         return entries.stream()
                 .filter(e -> e.sig.equals(sig))
                 .findFirst()

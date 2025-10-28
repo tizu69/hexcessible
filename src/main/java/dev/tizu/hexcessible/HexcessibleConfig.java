@@ -20,6 +20,8 @@ public class HexcessibleConfig implements ConfigData {
     public boolean hideFloaties = false;
     @ConfigEntry.Gui.Tooltip
     public boolean showAllDots = false;
+    @ConfigEntry.Gui.Tooltip
+    public boolean keyDocs = false; // TODO: customizable keybind
 
     @ConfigEntry.Gui.CollapsibleObject
     public MouseDraw mouseDraw = new MouseDraw();
