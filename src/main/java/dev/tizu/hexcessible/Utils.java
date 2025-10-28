@@ -1,5 +1,8 @@
 package dev.tizu.hexcessible;
 
+import at.petrak.hexcasting.api.casting.math.HexCoord;
+import at.petrak.hexcasting.api.casting.math.HexPattern;
+
 public class Utils {
     private Utils() {
     }
@@ -28,5 +31,15 @@ public class Utils {
         if (!candidate.isEmpty() && candidate.toLowerCase().startsWith(q))
             score += 15;
         return qi == q.length() ? score : 0;
+    }
+
+    public static HexCoord finalPos(HexCoord start, HexPattern pattern) {
+        var dir = pattern.getStartDir();
+        start = start.plus(dir);
+        for (var angle : pattern.getAngles()) {
+            dir = dir.rotatedBy(angle);
+            start = start.plus(dir);
+        }
+        return start;
     }
 }
