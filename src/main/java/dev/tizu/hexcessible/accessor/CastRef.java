@@ -50,6 +50,15 @@ public class CastRef {
         return usedSpots.contains(coord) || !isVisible(coord);
     }
 
+    public boolean isValidPatternAddition(HexPattern pat, HexDir next) {
+        return new HexPattern(pat.getStartDir(), pat.getAngles())
+                .tryAppendDir(next);
+    }
+
+    public boolean isValidPatternAddition(HexPattern pat, HexAngle next) {
+        return isValidPatternAddition(pat, pat.finalDir().rotatedBy(next));
+    }
+
     public boolean isVisible(HexCoord coord) {
         var pos = coordToPx(coord);
         return pos.x >= 0 && pos.x < castui.width

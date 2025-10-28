@@ -172,10 +172,10 @@ public final class KeyboardDrawing extends DrawState {
         var tr = MinecraftClient.getInstance().textRenderer;
         for (var angle : HexAngle.values()) {
             var pos = point.plus(dir.rotatedBy(angle));
-            if (castref.isUsed(pos)) // TODO: don't show illegal (double) moves
-                continue;
             var charstr = angleAsCharStr(angle);
-            if (charstr == null)
+            if (castref.isUsed(pos) || !castref.isValidPatternAddition(
+                    new HexPattern(this.dir, getAngles()), angle)
+                    || charstr == null)
                 continue;
             var px = castref.coordToPx(pos);
             ctx.drawCenteredTextWithShadow(tr, Text.literal(charstr),
