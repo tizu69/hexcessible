@@ -65,7 +65,7 @@ public class KeyDocsScreenMixin {
         if (ptrn == null)
             return false;
         var entry = BookEntries.INSTANCE.getBookEntryFor(ptrn.id().toString());
-        if (entry == null)
+        if (entry == null || entry.entryid() == null)
             return false;
         PatchouliAPI.get().openBookEntry(BookEntries.BOOKID,
                 entry.entryid(), entry.page());

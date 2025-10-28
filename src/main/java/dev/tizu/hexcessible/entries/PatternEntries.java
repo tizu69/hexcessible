@@ -12,6 +12,7 @@ import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
 import dev.tizu.hexcessible.Utils;
+import dev.tizu.hexcessible.smartsig.SmartSig.SmartSigRegistry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -47,7 +48,7 @@ public class PatternEntries {
         if (query == null || query.isEmpty())
             return get();
 
-        return entries.stream()
+        var out = new ArrayList<>(entries.stream()
                 .map(e -> {
                     var score = 0;
                     score += Utils.fuzzyScore(query, e.name) * 3; // important!
@@ -58,7 +59,10 @@ public class PatternEntries {
                 .filter(e -> e.getValue() > 0)
                 .sorted((a, b) -> b.getValue() - a.getValue())
                 .map(Map.Entry::getKey)
-                .toList();
+                .toList());
+        for (var smart : SmartSigRegistry.get(query))
+            out.add(0, smart);
+        return out;
     }
 
     public @Nullable Entry getFromSig(List<HexAngle> sig) {

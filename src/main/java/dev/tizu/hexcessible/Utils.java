@@ -53,8 +53,17 @@ public class Utils {
             case 'e' -> HexAngle.RIGHT;
             case 'a' -> HexAngle.LEFT_BACK;
             case 'd' -> HexAngle.RIGHT_BACK;
+            case 'Q' -> HexAngle.LEFT;
+            case 'W' -> HexAngle.FORWARD;
+            case 'E' -> HexAngle.RIGHT;
+            case 'A' -> HexAngle.LEFT_BACK;
+            case 'D' -> HexAngle.RIGHT_BACK;
             default -> throw new IllegalStateException(c + " invalid");
         };
+    }
+
+    public static List<HexAngle> strToAngles(String angles) {
+        return angles.chars().mapToObj(c -> charToAngle((char) c)).toList();
     }
 
     public static String anglesAsStr(List<HexAngle> angles) {

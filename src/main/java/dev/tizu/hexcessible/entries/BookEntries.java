@@ -69,7 +69,7 @@ public class BookEntries {
         this.locked = locked;
     }
 
-    public static record Entry(String id, Identifier entryid,
+    public static record Entry(String id, @Nullable Identifier entryid,
             String desc, String in, String out, int page) {
         public String getArgs() {
             return (in + " -> " + out).strip();
