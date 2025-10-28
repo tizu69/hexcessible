@@ -48,6 +48,7 @@ public class KeyDocsScreenMixin {
     void openHexbook(int keycode, int scancode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
         if ((Object) this instanceof DrawStateMixinAccessor accessor
                 && accessor.state() instanceof Idling
+                && Hexcessible.cfg().keyDocs
                 && keycode == GLFW.GLFW_KEY_N) {
             staffScreen = (GuiSpellcasting) (Object) this;
             var pos = accessor.getPatternAt((int) mousePos.x, (int) mousePos.y);
