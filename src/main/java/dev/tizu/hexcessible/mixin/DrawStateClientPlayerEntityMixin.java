@@ -18,6 +18,9 @@ public class DrawStateClientPlayerEntityMixin {
 
     @Inject(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/TutorialManager;onMovement(Lnet/minecraft/client/input/Input;)V", shift = At.Shift.AFTER))
     private void noHexicalWalk(CallbackInfo info) {
+        if (true) // TODO: fix
+            return;
+
         MinecraftClient client = MinecraftClient.getInstance();
         if (!(client.currentScreen instanceof GuiSpellcasting))
             return;
