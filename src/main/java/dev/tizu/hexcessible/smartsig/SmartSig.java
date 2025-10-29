@@ -6,7 +6,6 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import at.petrak.hexcasting.api.casting.math.HexAngle;
-import dev.tizu.hexcessible.entries.BookEntries;
 import dev.tizu.hexcessible.entries.PatternEntries;
 
 public interface SmartSig {
@@ -14,7 +13,7 @@ public interface SmartSig {
     PatternEntries.Entry get(String query);
 
     @Nullable
-    BookEntries.Entry getDocumentation(List<HexAngle> sig);
+    PatternEntries.Entry get(List<HexAngle> sig);
 
     public static class SmartSigRegistry {
         private SmartSigRegistry() {
@@ -34,6 +33,15 @@ public interface SmartSig {
                     out.add(entry);
             }
             return out;
+        }
+
+        public static @Nullable PatternEntries.Entry get(List<HexAngle> sig) {
+            for (SmartSig ssig : REGISTRY) {
+                var entry = ssig.get(sig);
+                if (entry != null)
+                    return entry;
+            }
+            return null;
         }
 
         static {

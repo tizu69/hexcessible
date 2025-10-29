@@ -1,15 +1,14 @@
 package dev.tizu.hexcessible.smartsig;
 
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Queue;
-import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
 import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexDir;
+import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.Utils;
 import dev.tizu.hexcessible.entries.BookEntries;
 import dev.tizu.hexcessible.entries.PatternEntries;
@@ -18,72 +17,204 @@ import net.minecraft.util.Identifier;
 
 public class Number implements SmartSig {
 
+    private static final List<String> NUMBERS = new ArrayList<>();
+    static {
+        Collections.addAll(NUMBERS, Hexcessible.getAsset("/numbers.txt").split("\n"));
+    }
+
     @Override
     public @Nullable PatternEntries.Entry get(String query) {
-        int num;
+        float num;
         try {
-            num = Integer.parseInt(query);
+            num = Float.parseFloat(query);
         } catch (NumberFormatException e) {
             return null;
         }
 
-        var pattern = getStrPatternFor(num);
+        var pattern = getFor(num);
         if (pattern == null)
             return null;
-        var angles = Utils.strToAngles(pattern);
-        var i18nkey = Text.translatable("hexcessible.smartsig.number").getString();
-        return new PatternEntries.Entry(Identifier.of("hexcessible", "number"),
-                i18nkey, () -> false, HexDir.EAST, angles, List.of());
+        return getEntry(num);
     }
 
     @Override
-    public @Nullable BookEntries.Entry getDocumentation(List<HexAngle> sig) {
+    public @Nullable PatternEntries.Entry get(List<HexAngle> sig) {
         var sigstr = Utils.anglesAsStr(sig);
         if (!sigstr.startsWith("AQAA") && !sigstr.startsWith("DEDD"))
             return null;
-        return null;
+
+        var num = getFor(sig.subList(4, sig.size()));
+        if (sigstr.startsWith("DEDD"))
+            num = -num;
+        return getEntry(num);
     }
 
-    private @Nullable String getStrPatternFor(int target) {
+    private PatternEntries.Entry getEntry(float target) {
+        var sig = getFor(target);
+        var i18nkey = Text.translatable("hexcessible.smartsig.number").getString();
+        var doc = new BookEntries.Entry("hexcessible:number", null,
+                "(experimental)", "", String.valueOf(target), 0);
+        return new PatternEntries.Entry(Identifier.of("hexcessible", "number"),
+                i18nkey, () -> false, HexDir.EAST, sig, List.of(doc));
+    }
+
+    private float getFor(List<HexAngle> sig) {
+        var out = 0f;
+        for (HexAngle angle : sig)
+            out = switch (angle) {
+                case LEFT -> out + 5;
+                case FORWARD -> out + 1;
+                case RIGHT -> out + 10;
+                case LEFT_BACK -> out * 2;
+                case RIGHT_BACK -> out / 2f;
+                default -> out;
+            };
+        return out;
+    }
+
+    private @Nullable List<List<HexAngle>> getFor(float target) {
         if (target == 0)
-            return "aqaa";
+            return List.of(Utils.strToAngles("aqaa"));
+        var prefix = target >= 0 ? "aqaa" : "dedd";
 
-        String prefix = target >= 0 ? "aqaa" : "dedd";
-        double absTarget = Math.abs((double) target);
-
-        // another bfs; how fun
-        Queue<State> queue = new LinkedList<>();
-        Set<Double> visited = new HashSet<>();
-
-        queue.offer(new State(0.0, ""));
-        visited.add(0.0);
-
-        while (!queue.isEmpty() && visited.size() < 40960) {
-            State curr = queue.poll();
-            if (Math.abs(curr.value - absTarget) < 0.0001)
-                return prefix + curr.path;
-
-            tryOp(queue, visited, curr, 'w', curr.value + 1, absTarget);
-            tryOp(queue, visited, curr, 'q', curr.value + 5, absTarget);
-            tryOp(queue, visited, curr, 'e', curr.value + 10, absTarget);
-            if (curr.value > 0)
-                tryOp(queue, visited, curr, 'a', curr.value * 2, absTarget);
-            if (curr.value > 0)
-                tryOp(queue, visited, curr, 'd', curr.value / 2, absTarget);
+        if (target == (int) target) {
+            var simplePattern = trySimplePattern(Math.abs((int) target), prefix);
+            if (simplePattern != null)
+                return List.of(simplePattern);
         }
 
-        return null;
+        return decomposeNumber(target);
     }
 
-    private void tryOp(Queue<State> queue, Set<Double> visited, State curr,
-            char op, double newValue, double target) {
-        // don't explore if we're getting too far from target
-        if (newValue > target * 2 || visited.contains(newValue))
-            return;
-        visited.add(newValue);
-        queue.offer(new State(newValue, curr.path + op));
+    private @Nullable List<HexAngle> trySimplePattern(int target, String prefix) {
+        if (target > 2000)
+            return null;
+        if (target == 0)
+            return Utils.strToAngles("aqaa");
+        var pattern = NUMBERS.get(target - 1);
+        if (pattern == null)
+            return null;
+        return Utils.strToAngles(prefix + pattern);
     }
 
-    private static record State(double value, String path) {
+    private List<List<HexAngle>> decomposeNumber(float target) {
+        // is decomposition possible?
+        if (Math.abs(target - Math.round(target)) < 0.001) {
+            int intTarget = Math.round(target);
+            return decomposeInt(intTarget);
+        }
+
+        // for non-ints, try to express as a fraction and decompose
+        // -> multiply by small powers of 2 to make integer
+        for (int denom = 2; denom <= 32; denom *= 2) {
+            int numer = Math.round(target * denom);
+            if (Math.abs(target - (float) numer / denom) < 0.001) {
+                var numerPatterns = decomposeInt(numer);
+                var denomPatterns = decomposeInt(denom);
+                return combineWithOp(numerPatterns, denomPatterns,
+                        Utils.strToAngles("wdedw"));
+            }
+        }
+
+        // fallback: just decompose as integer
+        return decomposeInt(Math.round(target));
+    }
+
+    private List<List<HexAngle>> decomposeInt(int target) {
+        var absTarget = Math.abs(target);
+        // For small numbers, try direct generation first
+        if (Math.abs(absTarget) <= 2000) {
+            var pattern = trySimplePattern((int) Math.abs(absTarget),
+                    target >= 0 ? "aqaa" : "dedd");
+            if (pattern != null)
+                return List.of(pattern);
+        }
+
+        // a^b * c + d or a^b + g
+        var bestA = 2;
+        var bestE = 2;
+        var decomp1 = decomposeIntInner(absTarget, bestA);
+        var bestB = decomp1[0];
+        var bestC = decomp1[1];
+        var bestD = decomp1[2];
+        var bestF = decomp1[3];
+        var bestG = decomp1[4];
+
+        for (var a = 3; a <= Math.sqrt(absTarget); a++) {
+            var decomp = decomposeIntInner(absTarget, a);
+            if (decomp[2] < bestD) {
+                bestA = a;
+                bestB = decomp[0];
+                bestC = decomp[1];
+                bestD = decomp[2];
+            }
+            if (decomp[4] < bestG) {
+                bestE = a;
+                bestF = decomp[3];
+                bestG = decomp[4];
+            }
+        }
+
+        // a^b * c + d
+        var opt1 = buildDecomposition(bestA, bestB, bestC, bestD, true);
+        // a^b + g
+        var opt2 = buildDecomposition(bestE, bestF, 1, bestG, false);
+        var result = opt1.size() <= opt2.size() ? opt1 : opt2;
+
+        if (target < 0)
+            result = negatePatterns(result);
+        return result;
+    }
+
+    private int[] decomposeIntInner(int num, int a) {
+        var b = (int) Math.floor(Math.log(num) / Math.log(a));
+        var aPowB = (int) Math.pow(a, b);
+        var c = num / aPowB;
+        var d = num - aPowB * c;
+        var g = num - aPowB;
+        return new int[] { b, c, d, b, g };
+    }
+
+    private List<List<HexAngle>> buildDecomposition(int a, int b, int c, int d, boolean includeC) {
+        List<List<HexAngle>> result = new ArrayList<>();
+        result.addAll(decomposeInt(a));
+        result.addAll(decomposeInt(b));
+        result.add(Utils.strToAngles("wedew")); // ^
+
+        if (includeC && c != 1) {
+            result.addAll(decomposeInt(c));
+            result.add(Utils.strToAngles("waqaw")); // *
+        }
+        if (d != 0) {
+            result.addAll(decomposeInt(d));
+            result.add(Utils.strToAngles("waaw")); // +
+        }
+
+        return result;
+    }
+
+    private List<List<HexAngle>> combineWithOp(List<List<HexAngle>> left, List<List<HexAngle>> right,
+            List<HexAngle> op) {
+        List<List<HexAngle>> result = new ArrayList<>();
+        result.addAll(left);
+        result.addAll(right);
+        result.add(op);
+        return result;
+    }
+
+    private List<List<HexAngle>> negatePatterns(List<List<HexAngle>> patterns) {
+        if (patterns.size() == 1) {
+            var sig = Utils.anglesAsStr(patterns.get(0));
+            if (sig.startsWith("aqaa"))
+                return List.of(Utils.strToAngles("dedd" + sig.substring(4)));
+            else if (sig.startsWith("dedd"))
+                return List.of(Utils.strToAngles("aqaa" + sig.substring(4)));
+        }
+
+        // compound expressions
+        List<List<HexAngle>> result = new ArrayList<>(patterns);
+        result.add(Utils.strToAngles("deddw"));
+        result.add(Utils.strToAngles("waqaw"));
+        return result;
     }
 }

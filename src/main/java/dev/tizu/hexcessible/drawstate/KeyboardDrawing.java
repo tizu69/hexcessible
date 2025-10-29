@@ -62,6 +62,12 @@ public final class KeyboardDrawing extends DrawState {
             super.requestExit();
     }
 
+    private int queuedCount() {
+        if (nextDrawing == null)
+            return 0;
+        return 1 + nextDrawing.queuedCount();
+    }
+
     @Nullable
     private HexCoord start() {
         if (sig.isEmpty())
@@ -90,7 +96,7 @@ public final class KeyboardDrawing extends DrawState {
         if (Hexcessible.cfg().keyboardDraw.keyHint)
             renderNextPointTooltips(ctx);
         KeyboardDrawing.render(ctx, mx, my, sig, "␣⇥↩", start() == null,
-                Hexcessible.cfg().keyboardDraw.tooltip);
+                Hexcessible.cfg().keyboardDraw.tooltip, queuedCount());
     }
 
     @Override
@@ -226,7 +232,8 @@ public final class KeyboardDrawing extends DrawState {
     }
 
     public static void render(DrawContext ctx, int mx, int y, List<HexAngle> sig,
-            String submitKeys, boolean failed, HexcessibleConfig.Tooltip tooltip) {
+            String submitKeys, boolean failed, HexcessibleConfig.Tooltip tooltip,
+            int queued) {
         var tr = MinecraftClient.getInstance().textRenderer;
         if (sig.isEmpty() || !tooltip.visible())
             return;
@@ -241,6 +248,12 @@ public final class KeyboardDrawing extends DrawState {
         if (failed) {
             ctx.drawTooltip(tr, Text.translatable("hexcessible.no_space")
                     .formatted(Formatting.RED), mx, y);
+            y += 17;
+        }
+
+        if (queued > 0) {
+            ctx.drawTooltip(tr, Text.translatable("hexcessible.count_queued",
+                    queued).formatted(Formatting.YELLOW), mx, y);
             y += 17;
         }
 
