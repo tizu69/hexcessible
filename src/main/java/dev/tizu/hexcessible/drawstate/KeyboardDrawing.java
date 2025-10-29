@@ -31,6 +31,7 @@ public final class KeyboardDrawing extends DrawState {
     private List<HexAngle> sig;
     private HexCoord origin;
     private HexDir startDir = HexDir.EAST;
+    private KeyboardDrawing nextDrawing;
 
     public KeyboardDrawing(CastRef castref, List<HexAngle> sig) {
         this(castref, sig, new HexCoord(0, 0));
@@ -40,6 +41,25 @@ public final class KeyboardDrawing extends DrawState {
         super(castref);
         this.sig = new ArrayList<>(sig);
         this.origin = start;
+    }
+
+    public KeyboardDrawing(CastRef castref, HexCoord start, List<List<HexAngle>> sigs) {
+        super(castref);
+        if (sigs.isEmpty())
+            throw new IllegalArgumentException();
+        this.sig = new ArrayList<>(sigs.get(0));
+        this.origin = start;
+        if (sigs.size() > 1)
+            this.nextDrawing = new KeyboardDrawing(castref, start,
+                    sigs.subList(1, sigs.size()));
+    }
+
+    @Override
+    public void requestExit() {
+        if (nextDrawing != null)
+            nextState = nextDrawing;
+        else
+            super.requestExit();
     }
 
     @Nullable

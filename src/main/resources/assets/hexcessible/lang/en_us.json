@@ -2,9 +2,10 @@
     "hexcessible.start_typing": "Start typing...",
     "hexcessible.count_locked": "+%s locked",
     "hexcessible.no_space": "Can't place this here",
+    "hexcessible.count_queued": "%s more to go",
     "hexcessible.no_draw_methods": "All methods of drawing are disabled. Please enable at least one to cast spells.",
 
-    "hexcessible.smartsig.number": "Insert as number",
+    "hexcessible.smartsig.number": "Constant Number",
 
     "text.autoconfig.hexcessible.title": "Hexcessible Config",
     "text.autoconfig.hexcessible.option.debug": "Debug Mode",

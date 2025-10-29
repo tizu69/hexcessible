@@ -33,7 +33,7 @@ public class PatternEntries {
             var name = Text.translatable(HexAPI.instance().getActionI18nKey(key)).getString();
             Supplier<Boolean> checkLock = () -> BookEntries.INSTANCE.isLocked(id.toString());
             var dir = item.prototype().getStartDir();
-            var sig = item.prototype().getAngles();
+            var sig = List.of(item.prototype().getAngles());
             var impls = BookEntries.INSTANCE.get(id);
             entries.add(new Entry(id, name, checkLock, dir, sig, impls));
         });
@@ -66,6 +66,9 @@ public class PatternEntries {
     }
 
     public @Nullable Entry getFromSig(List<HexAngle> sig) {
+        var smart = SmartSigRegistry.get(sig);
+        if (smart != null)
+            return smart;
         return entries.stream()
                 .filter(e -> e.sig.equals(sig))
                 .findFirst()
@@ -73,14 +76,19 @@ public class PatternEntries {
     }
 
     public static record Entry(Identifier id, String name, Supplier<Boolean> checkLock,
-            HexDir dir, List<HexAngle> sig, List<BookEntries.Entry> impls) {
+            HexDir dir, List<List<HexAngle>> sig, List<BookEntries.Entry> impls) {
         public boolean locked() {
             return checkLock.get();
         }
 
         public String toString() {
-            return "<" + dir + "," + Utils.anglesAsStr(sig).toLowerCase()
-                    + "> " + name;
+            StringBuilder sb = new StringBuilder();
+            for (var s : sig)
+                sb.append("<").append(dir).append(",")
+                        .append(Utils.anglesAsStr(s).toLowerCase())
+                        .append("> ");
+            sb.append(name);
+            return sb.toString();
         }
     }
 }

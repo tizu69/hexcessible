@@ -80,7 +80,7 @@ public final class AutoCompleting extends DrawState {
             case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB:
                 if (opts.isEmpty())
                     return;
-                nextState = new KeyboardDrawing(castref, opts.get(chosen).sig(), start);
+                nextState = new KeyboardDrawing(castref, start, opts.get(chosen).sig());
                 break;
             case GLFW.GLFW_KEY_UP:
                 offsetChosen(-1);
