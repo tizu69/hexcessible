@@ -68,12 +68,12 @@ public class Utils {
 
     public static String anglesAsStr(List<HexAngle> angles) {
         return angles.stream().map(s -> switch (s) {
-            case LEFT -> "Q";
-            case FORWARD -> "W";
-            case RIGHT -> "E";
-            case LEFT_BACK -> "A";
-            case BACK -> "S";
-            case RIGHT_BACK -> "D";
+            case LEFT -> "q";
+            case FORWARD -> "w";
+            case RIGHT -> "e";
+            case LEFT_BACK -> "a";
+            case BACK -> "s";
+            case RIGHT_BACK -> "d";
         }).reduce("", String::concat);
     }
 }
