@@ -85,7 +85,7 @@ public class PatternEntries {
             StringBuilder sb = new StringBuilder();
             for (var s : sig)
                 sb.append("<").append(dir).append(",")
-                        .append(Utils.anglesAsStr(s).toLowerCase())
+                        .append(Utils.angle(s).toLowerCase())
                         .append("> ");
             sb.append(name);
             return sb.toString();

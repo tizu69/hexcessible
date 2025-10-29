@@ -39,7 +39,7 @@ public class Number implements SmartSig {
 
     @Override
     public @Nullable PatternEntries.Entry get(List<HexAngle> sig) {
-        var sigstr = Utils.anglesAsStr(sig);
+        var sigstr = Utils.angle(sig);
         if (!sigstr.startsWith("AQAA") && !sigstr.startsWith("DEDD"))
             return null;
 
@@ -74,7 +74,7 @@ public class Number implements SmartSig {
 
     private @Nullable List<List<HexAngle>> getFor(float target) {
         if (target == 0)
-            return List.of(Utils.strToAngles("aqaa"));
+            return List.of(Utils.angle("aqaa"));
         var prefix = target >= 0 ? "aqaa" : "dedd";
 
         if (target == (int) target) {
@@ -90,11 +90,11 @@ public class Number implements SmartSig {
         if (target > 2000)
             return null;
         if (target == 0)
-            return Utils.strToAngles("aqaa");
+            return Utils.angle("aqaa");
         var pattern = NUMBERS.get(target - 1);
         if (pattern == null)
             return null;
-        return Utils.strToAngles(prefix + pattern);
+        return Utils.angle(prefix + pattern);
     }
 
     private List<List<HexAngle>> decomposeNumber(float target) {
@@ -112,7 +112,7 @@ public class Number implements SmartSig {
                 var numerPatterns = decomposeInt(numer);
                 var denomPatterns = decomposeInt(denom);
                 return combineWithOp(numerPatterns, denomPatterns,
-                        Utils.strToAngles("wdedw"));
+                        Utils.angle("wdedw"));
             }
         }
 
@@ -179,15 +179,15 @@ public class Number implements SmartSig {
         List<List<HexAngle>> result = new ArrayList<>();
         result.addAll(decomposeInt(a));
         result.addAll(decomposeInt(b));
-        result.add(Utils.strToAngles("wedew")); // ^
+        result.add(Utils.angle("wedew")); // ^
 
         if (includeC && c != 1) {
             result.addAll(decomposeInt(c));
-            result.add(Utils.strToAngles("waqaw")); // *
+            result.add(Utils.angle("waqaw")); // *
         }
         if (d != 0) {
             result.addAll(decomposeInt(d));
-            result.add(Utils.strToAngles("waaw")); // +
+            result.add(Utils.angle("waaw")); // +
         }
 
         return result;
@@ -204,17 +204,17 @@ public class Number implements SmartSig {
 
     private List<List<HexAngle>> negatePatterns(List<List<HexAngle>> patterns) {
         if (patterns.size() == 1) {
-            var sig = Utils.anglesAsStr(patterns.get(0));
+            var sig = Utils.angle(patterns.get(0));
             if (sig.startsWith("aqaa"))
-                return List.of(Utils.strToAngles("dedd" + sig.substring(4)));
+                return List.of(Utils.angle("dedd" + sig.substring(4)));
             else if (sig.startsWith("dedd"))
-                return List.of(Utils.strToAngles("aqaa" + sig.substring(4)));
+                return List.of(Utils.angle("aqaa" + sig.substring(4)));
         }
 
         // compound expressions
         List<List<HexAngle>> result = new ArrayList<>(patterns);
-        result.add(Utils.strToAngles("deddw"));
-        result.add(Utils.strToAngles("waqaw"));
+        result.add(Utils.angle("deddw"));
+        result.add(Utils.angle("waqaw"));
         return result;
     }
 }

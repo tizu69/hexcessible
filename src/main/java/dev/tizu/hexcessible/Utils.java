@@ -46,7 +46,7 @@ public class Utils {
         return start;
     }
 
-    public static HexAngle charToAngle(char c) {
+    public static HexAngle angle(char c) {
         return switch (c) {
             case 'q' -> HexAngle.LEFT;
             case 'w' -> HexAngle.FORWARD;
@@ -62,11 +62,11 @@ public class Utils {
         };
     }
 
-    public static List<HexAngle> strToAngles(String angles) {
-        return angles.chars().mapToObj(c -> charToAngle((char) c)).toList();
+    public static List<HexAngle> angle(String angles) {
+        return angles.chars().mapToObj(c -> angle((char) c)).toList();
     }
 
-    public static String anglesAsStr(List<HexAngle> angles) {
+    public static String angle(List<HexAngle> angles) {
         return angles.stream().map(s -> switch (s) {
             case LEFT -> "q";
             case FORWARD -> "w";

@@ -106,8 +106,8 @@ public final class KeyboardDrawing extends DrawState {
         if (chr == 's') // go back
             removeCharFromSig();
         else if (validSig.contains(chr)
-                && canGo(Utils.charToAngle(chr))) // valid
-            sig.add(Utils.charToAngle(chr));
+                && canGo(Utils.angle(chr))) // valid
+            sig.add(Utils.angle(chr));
     }
 
     @Override
@@ -238,7 +238,7 @@ public final class KeyboardDrawing extends DrawState {
         if (sig.isEmpty() || !tooltip.visible())
             return;
 
-        var text = Text.literal(Utils.anglesAsStr(sig));
+        var text = Text.literal(Utils.angle(sig));
         if (!submitKeys.isEmpty() && !failed)
             text = text.append(Text.literal(" " + submitKeys)
                     .formatted(Formatting.DARK_GRAY));

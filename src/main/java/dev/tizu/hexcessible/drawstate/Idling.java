@@ -22,7 +22,7 @@ public final class Idling extends DrawState {
     public void onCharType(char chr) {
         if (Hexcessible.cfg().keyboardDraw.allow
                 && KeyboardDrawing.validSig.contains(chr))
-            nextState = new KeyboardDrawing(castref, List.of(Utils.charToAngle(chr)));
+            nextState = new KeyboardDrawing(castref, List.of(Utils.angle(chr)));
     }
 
     @Override
