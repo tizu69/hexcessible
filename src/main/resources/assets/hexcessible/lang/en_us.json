@@ -14,6 +14,10 @@
     "hexcessible.smartsig.bookkeeper.keep1": "keep one iota",
     "hexcessible.smartsig.bookkeeper.join": ", then ",
     "hexcessible.smartsig.bookkeeper.suffix": ".",
+    "hexcessible.smartsig.escape.escape": "Consideration",
+    "hexcessible.smartsig.escape.block_open": "Introspection",
+    "hexcessible.smartsig.escape.block_close": "Retrospection",
+    "hexcessible.smartsig.escape.undo": "Evanition",
 
     "text.autoconfig.hexcessible.title": "Hexcessible Config",
     "text.autoconfig.hexcessible.option.debug": "Debug Mode",
