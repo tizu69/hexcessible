@@ -46,6 +46,7 @@ public interface SmartSig {
 
         static {
             register(new Number());
+            register(new Bookkeeper());
         }
     }
 }

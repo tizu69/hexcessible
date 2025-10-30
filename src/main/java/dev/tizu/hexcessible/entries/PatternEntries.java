@@ -55,8 +55,7 @@ public class PatternEntries {
                     score += Utils.fuzzyScore(query, e.id.toString()
                             .replaceAll("[:_/]", " "));
                     return Map.entry(e, score);
-                })
-                .filter(e -> e.getValue() > 0)
+                }).filter(e -> e.getValue() > 0)
                 .sorted((a, b) -> b.getValue() - a.getValue())
                 .map(Map.Entry::getKey)
                 .toList());

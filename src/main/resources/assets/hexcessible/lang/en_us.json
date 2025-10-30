@@ -6,6 +6,14 @@
     "hexcessible.no_draw_methods": "All methods of drawing are disabled. Please enable at least one to cast spells.",
 
     "hexcessible.smartsig.number": "Constant Number",
+    "hexcessible.smartsig.bookkeeper": "Bookkeeper's Gambit (%s)",
+    "hexcessible.smartsig.bookkeeper.prefix": "Based on your current stack, this will ",
+    "hexcessible.smartsig.bookkeeper.drop": "drop %s iotas",
+    "hexcessible.smartsig.bookkeeper.drop1": "drop one iota",
+    "hexcessible.smartsig.bookkeeper.keep": "keep %s iotas",
+    "hexcessible.smartsig.bookkeeper.keep1": "keep one iota",
+    "hexcessible.smartsig.bookkeeper.join": ", then ",
+    "hexcessible.smartsig.bookkeeper.suffix": ".",
 
     "text.autoconfig.hexcessible.title": "Hexcessible Config",
     "text.autoconfig.hexcessible.option.debug": "Debug Mode",
