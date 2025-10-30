@@ -4,6 +4,7 @@ import java.util.List;
 
 import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
+import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 
 public class Utils {
@@ -76,5 +77,11 @@ public class Utils {
         if (uppercase)
             return angle(angles).toUpperCase();
         return angle(angles);
+    }
+
+    public static HexDir[] hexDirs() {
+        return new HexDir[] {
+                HexDir.EAST, HexDir.SOUTH_EAST, HexDir.SOUTH_WEST,
+                HexDir.WEST, HexDir.NORTH_WEST, HexDir.NORTH_EAST };
     }
 }

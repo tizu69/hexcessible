@@ -17,6 +17,7 @@ import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import at.petrak.hexcasting.common.msgs.MsgNewSpellPatternC2S;
 import at.petrak.hexcasting.xplat.IClientXplatAbstractions;
+import dev.tizu.hexcessible.Utils;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec2f;
 
@@ -90,10 +91,10 @@ public class CastRef {
 
         while (!queue.isEmpty()) {
             HexCoord current = queue.poll();
-            for (HexDir startDir : HexDir.values())
+            for (HexDir startDir : Utils.hexDirs())
                 if (fits(current, pat, startDir))
                     return new PatternPlacement(current, startDir);
-            for (HexDir dir : HexDir.values()) {
+            for (HexDir dir : Utils.hexDirs()) {
                 HexCoord next = current.plus(dir);
                 if (visited.add(next))
                     queue.add(next);
