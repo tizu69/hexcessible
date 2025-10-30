@@ -23,7 +23,7 @@ public class Number implements SmartSig {
     }
 
     @Override
-    public @Nullable PatternEntries.Entry get(String query) {
+    public @Nullable List<PatternEntries.Entry> get(String query) {
         float num;
         try {
             num = Float.parseFloat(query);
@@ -34,7 +34,7 @@ public class Number implements SmartSig {
         var pattern = getFor(num);
         if (pattern == null)
             return null;
-        return getEntry(num);
+        return List.of(getEntry(num));
     }
 
     @Override
@@ -54,8 +54,8 @@ public class Number implements SmartSig {
         var i18nkey = Text.translatable("hexcessible.smartsig.number").getString();
         var doc = new BookEntries.Entry("hexcessible:number", null,
                 "(experimental)", "", String.valueOf(target), 0);
-        return new PatternEntries.Entry(Identifier.of("hexcessible", "number"),
-                i18nkey, () -> false, HexDir.EAST, sig, List.of(doc));
+        return new PatternEntries.Entry(Identifier.of("hexcessible", "number/"
+                + target), i18nkey, () -> false, HexDir.EAST, sig, List.of(doc));
     }
 
     private float getFor(List<HexAngle> sig) {

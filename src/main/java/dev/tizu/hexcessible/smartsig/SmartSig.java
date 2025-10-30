@@ -10,7 +10,7 @@ import dev.tizu.hexcessible.entries.PatternEntries;
 
 public interface SmartSig {
     @Nullable
-    PatternEntries.Entry get(String query);
+    List<PatternEntries.Entry> get(String query);
 
     @Nullable
     PatternEntries.Entry get(List<HexAngle> sig);
@@ -30,7 +30,7 @@ public interface SmartSig {
             for (SmartSig sig : REGISTRY) {
                 var entry = sig.get(query);
                 if (entry != null)
-                    out.add(entry);
+                    out.addAll(entry);
             }
             return out;
         }

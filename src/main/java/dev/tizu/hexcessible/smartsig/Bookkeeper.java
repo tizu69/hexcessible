@@ -19,7 +19,7 @@ public class Bookkeeper implements SmartSig {
     // FIXME: A refactor may be badly needed.
 
     @Override
-    public @Nullable PatternEntries.Entry get(String query) {
+    public @Nullable List<PatternEntries.Entry> get(String query) {
         List<Boolean> target = new ArrayList<>();
         for (var i = 0; i < query.length(); i++) {
             var ch = query.charAt(i);
@@ -30,7 +30,7 @@ public class Bookkeeper implements SmartSig {
             else
                 return null;
         }
-        return getEntry(target);
+        return List.of(getEntry(target));
     }
 
     @Override
@@ -96,12 +96,17 @@ public class Bookkeeper implements SmartSig {
         angles.remove(0); // The first one we ignore, as it'll be handled by the
         // direction of the pattern, not something we can control with SmartSig.
 
+        var representation = new StringBuilder();
+        for (var i = 0; i < target.size(); i++)
+            representation.append(Boolean.TRUE.equals(target.get(i)) ? "v" : "-");
+
         var i18nkey = Text.translatable("hexcessible.smartsig.bookkeeper",
                 target.size()).getString();
         var doc = new BookEntries.Entry("hexcessible:bookkeeper", null,
                 getDesc(target), in.toString(), out.toString(), 0);
-        return new PatternEntries.Entry(Identifier.of("hexcessible", "bookkeeper"),
-                i18nkey, () -> false, HexDir.EAST, List.of(angles), List.of(doc));
+        return new PatternEntries.Entry(Identifier.of("hexcessible",
+                "bookkeeper/" + representation), i18nkey, () -> false,
+                HexDir.EAST, List.of(angles), List.of(doc));
     }
 
     private static String getDesc(List<Boolean> target) {

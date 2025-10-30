@@ -48,7 +48,10 @@ public class PatternEntries {
         if (query == null || query.isEmpty())
             return get();
 
-        var out = new ArrayList<>(entries.stream()
+        var entries = new ArrayList<>(this.entries);
+        entries.addAll(SmartSigRegistry.get(query));
+
+        return new ArrayList<>(entries.stream()
                 .map(e -> {
                     var score = 0;
                     score += Utils.fuzzyScore(query, e.name) * 3; // important!
@@ -59,9 +62,6 @@ public class PatternEntries {
                 .sorted((a, b) -> b.getValue() - a.getValue())
                 .map(Map.Entry::getKey)
                 .toList());
-        for (var smart : SmartSigRegistry.get(query))
-            out.add(0, smart);
-        return out;
     }
 
     public @Nullable Entry getFromSig(List<HexAngle> sig) {
