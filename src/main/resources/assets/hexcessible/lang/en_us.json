@@ -17,6 +17,8 @@
     "text.autoconfig.hexcessible.option.showAllDots.@Tooltip": "Show all dots in the spellcasting interface, instead of just the ones close to your cursor",
     "text.autoconfig.hexcessible.option.keyDocs": "N for Docs",
     "text.autoconfig.hexcessible.option.keyDocs.@Tooltip": "Press the N key while casting to open the book",
+    "text.autoconfig.hexcessible.option.uppercaseSig": "Uppercase Signature",
+    "text.autoconfig.hexcessible.option.uppercaseSig.@Tooltip": "Represent a signature, e.g. qaq, as QAQ",
     "text.autoconfig.hexcessible.option.mouseDraw": "Spellcasting with Mouse",
     "text.autoconfig.hexcessible.option.mouseDraw.tooltip": "Show tooltip",
     "text.autoconfig.hexcessible.option.keyboardDraw": "Spellcasting with Keyboard",

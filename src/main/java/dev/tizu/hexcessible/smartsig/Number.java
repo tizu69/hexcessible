@@ -40,11 +40,11 @@ public class Number implements SmartSig {
     @Override
     public @Nullable PatternEntries.Entry get(List<HexAngle> sig) {
         var sigstr = Utils.angle(sig);
-        if (!sigstr.startsWith("AQAA") && !sigstr.startsWith("DEDD"))
+        if (!sigstr.startsWith("aqaa") && !sigstr.startsWith("dedd"))
             return null;
 
         var num = getFor(sig.subList(4, sig.size()));
-        if (sigstr.startsWith("DEDD"))
+        if (sigstr.startsWith("dedd"))
             num = -num;
         return getEntry(num);
     }

@@ -47,17 +47,12 @@ public class Utils {
     }
 
     public static HexAngle angle(char c) {
-        return switch (c) {
+        return switch (Character.toLowerCase(c)) {
             case 'q' -> HexAngle.LEFT;
             case 'w' -> HexAngle.FORWARD;
             case 'e' -> HexAngle.RIGHT;
             case 'a' -> HexAngle.LEFT_BACK;
             case 'd' -> HexAngle.RIGHT_BACK;
-            case 'Q' -> HexAngle.LEFT;
-            case 'W' -> HexAngle.FORWARD;
-            case 'E' -> HexAngle.RIGHT;
-            case 'A' -> HexAngle.LEFT_BACK;
-            case 'D' -> HexAngle.RIGHT_BACK;
             default -> throw new IllegalStateException(c + " invalid");
         };
     }
@@ -75,5 +70,11 @@ public class Utils {
             case BACK -> "s";
             case RIGHT_BACK -> "d";
         }).reduce("", String::concat);
+    }
+
+    public static String angle(List<HexAngle> angles, boolean uppercase) {
+        if (uppercase)
+            return angle(angles).toUpperCase();
+        return angle(angles);
     }
 }

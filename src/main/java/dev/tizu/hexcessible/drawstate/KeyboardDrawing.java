@@ -24,7 +24,8 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec2f;
 
 public final class KeyboardDrawing extends DrawState {
-    public static final List<Character> validSig = List.of('q', 'w', 'e', 'a', 'd');
+    public static final List<Character> validSig = List.of(
+            'q', 'w', 'e', 'a', 'd', 'Q', 'W', 'E', 'A', 'D');
     public static final int COLOR1 = 0xff_64c8ff;
     public static final int COLOR2 = 0xff_fecbe6;
 
@@ -103,7 +104,7 @@ public final class KeyboardDrawing extends DrawState {
     public void onCharType(char chr) {
         if (!Hexcessible.cfg().keyboardDraw.allow)
             return;
-        if (chr == 's') // go back
+        if (Character.toLowerCase(chr) == 's') // go back
             removeCharFromSig();
         else if (validSig.contains(chr)
                 && canGo(Utils.angle(chr))) // valid
@@ -238,7 +239,7 @@ public final class KeyboardDrawing extends DrawState {
         if (sig.isEmpty() || !tooltip.visible())
             return;
 
-        var text = Text.literal(Utils.angle(sig));
+        var text = Text.literal(Utils.angle(sig, Hexcessible.cfg().uppercaseSig));
         if (!submitKeys.isEmpty() && !failed)
             text = text.append(Text.literal(" " + submitKeys)
                     .formatted(Formatting.DARK_GRAY));

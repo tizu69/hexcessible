@@ -70,7 +70,7 @@ public class PatternEntries {
         if (smart != null)
             return smart;
         return entries.stream()
-                .filter(e -> e.sig.equals(sig))
+                .filter(e -> e.sig.stream().anyMatch(s -> s.equals(sig)))
                 .findFirst()
                 .orElse(null);
     }

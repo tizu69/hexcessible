@@ -22,6 +22,8 @@ public class HexcessibleConfig implements ConfigData {
     public boolean showAllDots = false;
     @ConfigEntry.Gui.Tooltip
     public boolean keyDocs = false; // TODO: customizable keybind
+    @ConfigEntry.Gui.Tooltip
+    public boolean uppercaseSig = false;
 
     @ConfigEntry.Gui.CollapsibleObject
     public MouseDraw mouseDraw = new MouseDraw();
