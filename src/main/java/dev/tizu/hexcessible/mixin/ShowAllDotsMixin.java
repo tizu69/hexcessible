@@ -13,10 +13,10 @@ public class ShowAllDotsMixin {
 
     @ModifyVariable(at = @At("STORE"), method = "render", name = "radius")
     public int radius(int radius) {
-        return Hexcessible.cfg().showAllDots ? 30 : 3;
+        return Hexcessible.cfg().showAllDots ? 50 : 3;
     }
 
-    @ModifyVariable(at = @At(value = "INVOKE", target = "Lat/petrak/hexcasting/api/casting/math/HexCoord;rangeAround(I)Ljava/util/Iterator;", shift = At.Shift.AFTER), method = "render", name = "radius")
+    @ModifyVariable(at = @At(value = "INVOKE", target = "Lat/petrak/hexcasting/api/casting/math/HexCoord;rangeAround(I)Ljava/util/Iterator;", shift = At.Shift.AFTER), method = "render", name = "radius", remap = false)
     public int radius$reset(int radius) {
         return 3;
     }
