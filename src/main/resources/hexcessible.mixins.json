@@ -10,7 +10,8 @@
         "FloatiesMixin",
         "DimmedMixin",
         "ShowAllDotsMixin",
-        "KeyDocsScreenMixin"
+        "KeyDocsScreenMixin",
+        "PerWorldLearnMixin"
     ],
     "injectors": {
         "defaultRequire": 1

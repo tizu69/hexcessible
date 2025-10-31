@@ -1,11 +1,16 @@
 package dev.tizu.hexcessible;
 
+import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 
+import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigData;
+import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.autoconfig.annotation.ConfigEntry.Gui.EnumHandler.EnumDisplayOption;
+import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import me.shedaniel.clothconfig2.gui.entries.SelectionListEntry.Translatable;
 
 @Config(name = Hexcessible.MOD_ID)
@@ -36,6 +41,10 @@ public class HexcessibleConfig implements ConfigData {
 
     @ConfigEntry.Gui.NoTooltip
     public boolean debug = false;
+
+    @ConfigEntry.Gui.Excluded
+    /** Bit of a horrible format: <worldctx> <patternid> <sig> */
+    public List<String> knownWorldPatterns = List.of();
 
     public static class Idle {
         @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
@@ -108,5 +117,18 @@ public class HexcessibleConfig implements ConfigData {
 
     @Override
     public void validatePostLoad() throws ValidationException {
+    }
+
+    private static ConfigHolder<HexcessibleConfig> holder;
+
+    static HexcessibleConfig get() {
+        var holder = AutoConfig.register(HexcessibleConfig.class, GsonConfigSerializer::new);
+        var cfg = AutoConfig.getConfigHolder(HexcessibleConfig.class).getConfig();
+        HexcessibleConfig.holder = holder;
+        return cfg;
+    }
+
+    public void markDirty() {
+        holder.save();
     }
 }

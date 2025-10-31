@@ -6,9 +6,6 @@ import java.util.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
-
 public class Hexcessible {
     private Hexcessible() {
     }
@@ -16,13 +13,9 @@ public class Hexcessible {
     public static final String MOD_ID = "hexcessible";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    private static HexcessibleConfig cfg;
+    private static HexcessibleConfig cfg = HexcessibleConfig.get();
 
     public static HexcessibleConfig cfg() {
-        if (cfg == null) {
-            AutoConfig.register(HexcessibleConfig.class, GsonConfigSerializer::new);
-            cfg = AutoConfig.getConfigHolder(HexcessibleConfig.class).getConfig();
-        }
         return cfg;
     }
 

@@ -12,6 +12,7 @@ import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.api.mod.HexTags;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
+import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.Utils;
 import dev.tizu.hexcessible.smartsig.SmartSig.SmartSigRegistry;
 import net.minecraft.text.Text;
@@ -76,7 +77,7 @@ public class PatternEntries {
         if (smart != null)
             return smart;
         return entries.stream()
-                .filter(e -> e.sig.stream().anyMatch(s -> s.equals(sig)))
+                .filter(e -> e.equals(sig))
                 .findFirst()
                 .orElse(null);
     }
@@ -99,6 +100,65 @@ public class PatternEntries {
 
         public boolean isPerWorld() {
             return INSTANCE.perWorld.contains(id);
+        }
+
+        public @Nullable List<List<HexAngle>> sig() {
+            if (!isPerWorld())
+                return sig;
+
+            var pws = getPerWorldSig();
+            if (pws != null)
+                return List.of(pws);
+            return null;
+        }
+
+        public @Nullable List<HexAngle> getPerWorldSig() {
+            if (!isPerWorld())
+                throw new IllegalStateException("Requested per-world sig for non-per-world pattern");
+            var known = Hexcessible.cfg().knownWorldPatterns.stream()
+                    .filter(p -> {
+                        var knownEntry = p.split(" ");
+                        if (knownEntry.length != 3 || !knownEntry[0]
+                                .equals(Utils.getWorldContext()))
+                            return false;
+                        var id = Identifier.tryParse(p.split(" ")[1]);
+                        return id != null && id.equals(this.id);
+                    }).findFirst();
+            if (known.isPresent())
+                return Utils.angle(known.get().split(" ")[2]);
+            return null;
+        }
+
+        public void setPerWorldSig(List<HexAngle> sig) {
+            if (!isPerWorld())
+                throw new IllegalStateException("Tried to set per-world sig for non-per-world pattern");
+
+            var current = getPerWorldSig();
+            if (current != null) {
+                if (current.equals(sig))
+                    return;
+                Hexcessible.cfg().knownWorldPatterns.remove(getPerWorldSig(current));
+            }
+
+            Hexcessible.LOGGER.info("Learned per-world pattern {}", id);
+
+            // we need to shallow copy the list as it may be an immutable list,
+            // and we need to be able to modify it. is there a better way?
+            var kgp = new ArrayList<>(Hexcessible.cfg().knownWorldPatterns);
+            kgp.add(getPerWorldSig(sig));
+            Hexcessible.cfg().knownWorldPatterns = kgp;
+            Hexcessible.cfg().markDirty();
+        }
+
+        private String getPerWorldSig(List<HexAngle> sig) {
+            return Utils.getWorldContext() + " " + id + " " + Utils.angle(sig);
+        }
+
+        public boolean equals(Object other) {
+            if (!(other instanceof List<?> list))
+                return false;
+            var sig = this.sig();
+            return sig != null && sig.size() == 1 && list.equals(sig.get(0));
         }
     }
 }

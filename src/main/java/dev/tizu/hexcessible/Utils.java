@@ -6,6 +6,8 @@ import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.WorldSavePath;
 
 public class Utils {
     private Utils() {
@@ -83,5 +85,20 @@ public class Utils {
         return new HexDir[] {
                 HexDir.EAST, HexDir.SOUTH_EAST, HexDir.SOUTH_WEST,
                 HexDir.WEST, HexDir.NORTH_WEST, HexDir.NORTH_EAST };
+    }
+
+    private static final String WORLD_CONTEXT_RGX = "[^a-zA-Z0-9]";
+
+    public static String getWorldContext() {
+        var worldSolo = MinecraftClient.getInstance().getServer();
+        if (worldSolo != null)
+            return worldSolo.getSavePath(WorldSavePath.ROOT).normalize()
+                    .getFileName().toString().replaceAll(WORLD_CONTEXT_RGX, "_");
+
+        var worldMulti = MinecraftClient.getInstance().getCurrentServerEntry();
+        if (worldMulti != null)
+            return "multiplayer__" + worldMulti.name.replaceAll(WORLD_CONTEXT_RGX, "_");
+
+        return "unknown__";
     }
 }
