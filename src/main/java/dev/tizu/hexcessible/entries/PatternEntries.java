@@ -70,6 +70,8 @@ public class PatternEntries {
     }
 
     public List<Entry> get() {
+        // FIXME: when no query, smart sigs won't be included, even when some
+        // may work without a query
         return entries;
     }
 
@@ -105,7 +107,7 @@ public class PatternEntries {
         if (smart != null)
             return smart;
         return entries.stream()
-                .filter(e -> e.equals(sig))
+                .filter(e -> e.is(sig))
                 .findFirst()
                 .orElse(null);
     }
@@ -167,11 +169,9 @@ public class PatternEntries {
             return null;
         }
 
-        public boolean equals(Object other) {
-            if (!(other instanceof List<?> list))
-                return false;
+        public boolean is(List<HexAngle> other) {
             var sig = this.sig();
-            return sig != null && sig.size() == 1 && list.equals(sig.get(0));
+            return sig != null && sig.size() == 1 && other.equals(sig.get(0));
         }
     }
 }

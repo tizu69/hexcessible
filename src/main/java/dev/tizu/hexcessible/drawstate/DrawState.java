@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import dev.tizu.hexcessible.accessor.CastRef;
 import dev.tizu.hexcessible.accessor.CastingInterfaceAccessor;
+import kotlin.Pair;
 import net.minecraft.client.gui.DrawContext;
 
 public sealed class DrawState
@@ -84,5 +85,9 @@ public sealed class DrawState
 
     public static boolean shouldClose(DrawState current) {
         return current.wantsExit;
+    }
+
+    public Pair<List<String>, List<String>> getStackMod() {
+        return new Pair<>(List.of(), List.of());
     }
 }
