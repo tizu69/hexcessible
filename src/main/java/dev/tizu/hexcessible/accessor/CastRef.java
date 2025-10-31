@@ -129,4 +129,16 @@ public class CastRef {
 
         return true;
     }
+
+    public @Nullable HexPattern getPatternAt(int x, int y) {
+        var coord = pxToCoord(new Vec2f(x, y));
+        return patterns.stream()
+                .filter(p -> p.getOrigin().equals(coord)
+                        || p.getPattern().positions().stream()
+                                .map(pt -> pt.plus(p.getOrigin()))
+                                .anyMatch(pt -> pt.equals(coord)))
+                .findFirst()
+                .map(ResolvedPattern::getPattern)
+                .orElse(null);
+    }
 }

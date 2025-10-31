@@ -26,6 +26,8 @@ public class HexcessibleConfig implements ConfigData {
     public boolean uppercaseSig = false;
 
     @ConfigEntry.Gui.CollapsibleObject
+    public Idle idle = new Idle();
+    @ConfigEntry.Gui.CollapsibleObject
     public MouseDraw mouseDraw = new MouseDraw();
     @ConfigEntry.Gui.CollapsibleObject
     public KeyboardDraw keyboardDraw = new KeyboardDraw();
@@ -34,6 +36,11 @@ public class HexcessibleConfig implements ConfigData {
 
     @ConfigEntry.Gui.NoTooltip
     public boolean debug = false;
+
+    public static class Idle {
+        @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
+        public OptionalTooltip tooltip = OptionalTooltip.DESCRIPTIVE;
+    }
 
     public static class MouseDraw {
         @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
