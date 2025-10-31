@@ -19,7 +19,8 @@ public class Number implements SmartSig {
 
     private static final List<String> NUMBERS = new ArrayList<>();
     static {
-        Collections.addAll(NUMBERS, Hexcessible.getAsset("/numbers.txt").split("\n"));
+        Collections.addAll(NUMBERS, Hexcessible.getAsset("/numbers.txt")
+                .split(","));
     }
 
     @Override

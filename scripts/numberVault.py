@@ -15,4 +15,4 @@ with open("../src/main/resources/numbers.txt", "w") as f:
         if i in numbers:
             f.write(f"{numbers[i]}")
             if i < maxNumber:
-                f.write("\n")
+                f.write(",")
