@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import at.petrak.hexcasting.api.HexAPI;
 import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexDir;
+import at.petrak.hexcasting.api.mod.HexTags;
 import at.petrak.hexcasting.xplat.IXplatAbstractions;
 import dev.tizu.hexcessible.Utils;
 import dev.tizu.hexcessible.smartsig.SmartSig.SmartSigRegistry;
@@ -20,6 +21,7 @@ public class PatternEntries {
     public static final PatternEntries INSTANCE = new PatternEntries();
 
     private List<Entry> entries = new ArrayList<>();
+    private List<Identifier> perWorld = new ArrayList<>();
 
     private PatternEntries() {
         reindex();
@@ -28,6 +30,7 @@ public class PatternEntries {
     public void reindex() {
         IXplatAbstractions.INSTANCE.getActionRegistry().getKeys().forEach(key -> {
             var item = IXplatAbstractions.INSTANCE.getActionRegistry().get(key);
+            var entry = IXplatAbstractions.INSTANCE.getActionRegistry().getEntry(key);
 
             var id = key.getValue();
             var name = Text.translatable(HexAPI.instance().getActionI18nKey(key)).getString();
@@ -35,6 +38,10 @@ public class PatternEntries {
             var dir = item.prototype().getStartDir();
             var sig = List.of(item.prototype().getAngles());
             var impls = BookEntries.INSTANCE.get(id);
+
+            if (entry.get().isIn(HexTags.Actions.PER_WORLD_PATTERN))
+                perWorld.add(id);
+
             entries.add(new Entry(id, name, checkLock, dir, sig, impls));
         });
     }
@@ -88,6 +95,10 @@ public class PatternEntries {
                         .append("> ");
             sb.append(name);
             return sb.toString();
+        }
+
+        public boolean isPerWorld() {
+            return INSTANCE.perWorld.contains(id);
         }
     }
 }

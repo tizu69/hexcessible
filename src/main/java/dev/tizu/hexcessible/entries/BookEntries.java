@@ -50,16 +50,18 @@ public class BookEntries {
                     return;
                 try {
                     var type = JsonHelper.getString(root, "type");
-                    if (!type.equals("hexcasting:pattern"))
-                        return;
-                    var id = JsonHelper.getString(root, "op_id");
-                    if (!locked.containsKey(id))
-                        locked.put(id, entry::isLocked);
-                    var desc = JsonHelper.getString(root, "text", "");
-                    var in = JsonHelper.getString(root, "input", "");
-                    var out = JsonHelper.getString(root, "output", "");
-                    entries.add(new Entry(id, entryid, desc, in, out,
-                            pagei.getAndIncrement()));
+                    switch (type) {
+                        case "hexcasting:pattern":
+                            var id = JsonHelper.getString(root, "op_id");
+                            if (!locked.containsKey(id))
+                                locked.put(id, entry::isLocked);
+                            var desc = JsonHelper.getString(root, "text", "");
+                            var in = JsonHelper.getString(root, "input", "");
+                            var out = JsonHelper.getString(root, "output", "");
+                            entries.add(new Entry(id, entryid, desc, in, out,
+                                    pagei.getAndIncrement()));
+                            break;
+                    }
                 } catch (JsonSyntaxException e) {
                     Hexcessible.LOGGER.error("Failed to parse entry {}", entryid, e);
                 }

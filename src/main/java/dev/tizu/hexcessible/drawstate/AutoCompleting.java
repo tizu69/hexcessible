@@ -78,7 +78,7 @@ public final class AutoCompleting extends DrawState {
                 }
                 break;
             case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB:
-                if (opts.isEmpty())
+                if (opts.isEmpty() || opts.get(chosen).isPerWorld())
                     return;
                 nextState = new KeyboardDrawing(castref, start, opts.get(chosen).sig());
                 break;
@@ -152,9 +152,8 @@ public final class AutoCompleting extends DrawState {
     private void renderQueryTooltip(DrawContext ctx, int x, int y, int mx, int my) {
         var tr = MinecraftClient.getInstance().textRenderer;
         var tInput = !query.equals("")
-                ? Text.literal(query)
-                        .append(Text.literal(" " + opts.size())
-                                .formatted(Formatting.DARK_GRAY))
+                ? Text.literal(query).append(Text.literal(" " + opts.size())
+                        .formatted(Formatting.DARK_GRAY))
                 : Text.translatable("hexcessible.start_typing")
                         .formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
         ctx.drawTooltip(tr, tInput, noDistract() ? mx : x, noDistract() ? my : y);
@@ -190,11 +189,18 @@ public final class AutoCompleting extends DrawState {
     }
 
     private List<OrderedText> prepareDescription() {
-        if (!Hexcessible.cfg().autoComplete.tooltip.visible())
-            return List.of();
-
         var tr = MinecraftClient.getInstance().textRenderer;
         var opt = opts.get(chosen);
+
+        var wsa = "hexcessible.world_specific_autocomplete";
+
+        if (!Hexcessible.cfg().autoComplete.tooltip.visible()) {
+            if (opt.isPerWorld())
+                return tr.wrapLines(Text.literal("\n").append(
+                        Text.translatable(wsa).formatted(Formatting.RED)), 170);
+
+            return List.of();
+        }
 
         if (!Hexcessible.cfg().autoComplete.tooltip.descriptive()) {
             var text = Text.empty().formatted(Formatting.DARK_GRAY);
@@ -206,6 +212,11 @@ public final class AutoCompleting extends DrawState {
                     text.append(Text.literal("\n"));
                 text.append(Text.literal(impl.getArgs()));
             }
+
+            if (opt.isPerWorld())
+                text = text.append(Text.literal("\n"))
+                        .append(Text.translatable(wsa).formatted(Formatting.RED));
+
             return tr.wrapLines(text, 170);
         }
 
@@ -215,6 +226,10 @@ public final class AutoCompleting extends DrawState {
         var impl = opt.impls().get(chosenDoc);
         var description = Text.literal(docN + " " + impl.getArgs()).formatted(Formatting.GRAY)
                 .append(Text.literal("\n" + impl.getDesc()).formatted(Formatting.DARK_GRAY));
+
+        if (opt.isPerWorld())
+            description = description.append(Text.literal("\n"))
+                    .append(Text.translatable(wsa).formatted(Formatting.RED));
 
         return tr.wrapLines(description, 170);
     }
