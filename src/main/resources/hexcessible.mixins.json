@@ -6,7 +6,6 @@
         "DrawStateMixin",
         "DrawStateScreenMixin",
         "DrawStateParentElemMixin",
-        "DrawStateClientPlayerEntityMixin",
         "FloatiesMixin",
         "DimmedMixin",
         "ShowAllDotsMixin",
