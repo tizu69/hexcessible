@@ -33,8 +33,7 @@ public final class AutoCompleting extends DrawState {
     private String query = "";
     private int chosen = 0;
     private int chosenDoc = 0;
-    private List<PatternEntries.Entry> opts;
-    private List<PatternEntries.Entry> optsWithLocked;
+    private List<PatternEntries.Entry> suggestions = new ArrayList<>();
     private boolean lastInteractWasMouse = true;
     private Vec2f mousePos = new Vec2f(0, 0);
 
@@ -45,13 +44,15 @@ public final class AutoCompleting extends DrawState {
         this.anchor = castref.coordToPx(start);
         this.breakoutSize = (float) Math.pow(castref.hexSize() * 1.75, 2);
 
-        optsWithLocked = PatternEntries.INSTANCE.get();
-        opts = new ArrayList<>(optsWithLocked);
-        opts.removeIf(PatternEntries.Entry::locked);
+        suggestions = PatternEntries.INSTANCE.get();
     }
 
     public AutoCompleting(CastRef castref) {
         this(castref, new HexCoord(0, 0));
+    }
+
+    private List<PatternEntries.Entry> getUnlockedSuggestions() {
+        return suggestions.stream().filter(e -> !e.locked()).toList();
     }
 
     @Override
@@ -61,6 +62,7 @@ public final class AutoCompleting extends DrawState {
 
     @Override
     public void onKeyPress(int keyCode, int modifiers) {
+        var unlocked = getUnlockedSuggestions();
         if (noDistract())
             return; // if no options are shown, no need to provide opt controls.
         lastInteractWasMouse = false;
@@ -78,9 +80,9 @@ public final class AutoCompleting extends DrawState {
                 }
                 break;
             case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_TAB:
-                if (opts.isEmpty())
+                if (unlocked.isEmpty())
                     return;
-                var sig = opts.get(chosen).sig();
+                var sig = unlocked.get(chosen).sig();
                 if (sig == null)
                     return;
                 nextState = new KeyboardDrawing(castref, start, sig);
@@ -122,21 +124,26 @@ public final class AutoCompleting extends DrawState {
         if (!Hexcessible.cfg().autoComplete.allow)
             return;
         this.query = query;
-        optsWithLocked = PatternEntries.INSTANCE.get(query);
-        opts = new ArrayList<>(optsWithLocked);
-        opts.removeIf(PatternEntries.Entry::locked);
+        suggestions = PatternEntries.INSTANCE.get(query);
         chosen = 0;
         chosenDoc = 0;
     }
 
     private void offsetChosen(int by) {
-        var size = opts.size();
+        var size = getUnlockedSuggestions().size();
+        if (size == 0)
+            return;
         chosen = ((chosen + by) % size + size) % size;
         chosenDoc = 0;
     }
 
     private void offsetChosenDoc(int by) {
-        var size = opts.get(chosen).impls().size();
+        var unlocked = getUnlockedSuggestions();
+        if (unlocked.isEmpty())
+            return;
+        var size = unlocked.get(chosen).impls().size();
+        if (size == 0)
+            return;
         chosenDoc = ((chosenDoc + by) % size + size) % size;
     }
 
@@ -147,15 +154,16 @@ public final class AutoCompleting extends DrawState {
         var x = (int) anchor.x;
         var y = (int) anchor.y;
         renderQueryTooltip(ctx, x, y, mx, my);
-        if (opts.isEmpty() || noDistract())
+        if (getUnlockedSuggestions().isEmpty() || noDistract())
             return;
         renderAutocompleteTooltips(ctx, x, y);
     }
 
     private void renderQueryTooltip(DrawContext ctx, int x, int y, int mx, int my) {
         var tr = MinecraftClient.getInstance().textRenderer;
+        var unlockedCount = getUnlockedSuggestions().size();
         var tInput = !query.equals("")
-                ? Text.literal(query).append(Text.literal(" " + opts.size())
+                ? Text.literal(query).append(Text.literal(" " + unlockedCount)
                         .formatted(Formatting.DARK_GRAY))
                 : Text.translatable("hexcessible.start_typing")
                         .formatted(Formatting.DARK_GRAY, Formatting.ITALIC);
@@ -173,55 +181,74 @@ public final class AutoCompleting extends DrawState {
     }
 
     private List<Text> prepareOptions() {
+        var unlocked = getUnlockedSuggestions();
         var count = Hexcessible.cfg().autoComplete.count;
         var previs = count < 3 ? 0 : 2; // amount of options to show above chosen
-        var optsStart = Math.max(0, Math.min(chosen - previs, opts.size() - count));
-        var optsEnd = Math.min(opts.size(), optsStart + count);
+        var optsStart = Math.max(0, Math.min(chosen - previs, unlocked.size() - count));
+        var optsEnd = Math.min(unlocked.size(), optsStart + count);
         List<Text> options = IntStream.range(optsStart, optsEnd)
                 .mapToObj(i -> {
                     var picked = i == chosen;
                     var fmt = picked ? Formatting.BLUE : Formatting.GRAY;
-                    return Text.literal(opts.get(i).toString()).formatted(fmt);
+                    return Text.literal(unlocked.get(i).toString()).formatted(fmt);
                 })
                 .collect(Collectors.toCollection(ArrayList::new));
-        var lockedN = optsWithLocked.size() - opts.size();
+        var lockedN = suggestions.size() - unlocked.size();
         if (lockedN > 0)
             options.add(Text.translatable("hexcessible.count_locked",
                     lockedN).formatted(Formatting.DARK_GRAY));
         return options;
     }
 
-    private List<OrderedText> prepareDescription() {
+    private List<OrderedText> getDescriptionForSimpleTooltip(PatternEntries.Entry opt) {
         var tr = MinecraftClient.getInstance().textRenderer;
-        var opt = opts.get(chosen);
-
-        if (opt.sig() == null)
-            return tr.wrapLines(Text.translatable("hexcessible.world_specific_autocomplete")
-                    .formatted(Formatting.RED), 170);
-
-        if (!Hexcessible.cfg().autoComplete.tooltip.visible())
-            return List.of();
-
-        if (!Hexcessible.cfg().autoComplete.tooltip.descriptive()) {
-            var text = Text.empty().formatted(Formatting.DARK_GRAY);
-            var first = true;
-            for (var impl : opt.impls()) {
-                if (first)
-                    first = false;
-                else
-                    text.append(Text.literal("\n"));
-                text.append(Text.literal(impl.getArgs()));
-            }
-            return tr.wrapLines(text, 170);
+        var text = Text.empty().formatted(Formatting.DARK_GRAY);
+        var first = true;
+        for (var impl : opt.impls()) {
+            if (first)
+                first = false;
+            else
+                text.append(Text.literal("\n"));
+            text.append(Text.literal(impl.getArgs()));
         }
+        return tr.wrapLines(text, 170);
+    }
 
-        if (chosenDoc >= opt.impls().size())
+    private List<OrderedText> getDescriptionForDescriptiveTooltip(PatternEntries.Entry opt) {
+        var tr = MinecraftClient.getInstance().textRenderer;
+        if (chosenDoc >= opt.impls().size()) {
             return List.of();
+        }
         var docN = "[" + (chosenDoc + 1) + "/" + opt.impls().size() + "]";
         var impl = opt.impls().get(chosenDoc);
         var description = Text.literal(docN + " " + impl.getArgs()).formatted(Formatting.GRAY)
                 .append(Text.literal("\n" + impl.getDesc()).formatted(Formatting.DARK_GRAY));
         return tr.wrapLines(description, 170);
+    }
+
+    private List<OrderedText> prepareDescription() {
+        var tr = MinecraftClient.getInstance().textRenderer;
+        var unlocked = getUnlockedSuggestions();
+        if (unlocked.isEmpty() || chosen >= unlocked.size()) {
+            return List.of();
+        }
+        var opt = unlocked.get(chosen);
+
+        if (opt.sig() == null) {
+            return tr.wrapLines(Text.translatable("hexcessible.world_specific_autocomplete")
+                    .formatted(Formatting.RED), 170);
+        }
+
+        var tooltipConfig = Hexcessible.cfg().autoComplete.tooltip;
+        if (!tooltipConfig.visible()) {
+            return List.of();
+        }
+
+        if (!tooltipConfig.descriptive()) {
+            return getDescriptionForSimpleTooltip(opt);
+        }
+
+        return getDescriptionForDescriptiveTooltip(opt);
     }
 
     private void drawTooltips(DrawContext ctx, int mx, int my, List<Text> options, List<OrderedText> descLines) {

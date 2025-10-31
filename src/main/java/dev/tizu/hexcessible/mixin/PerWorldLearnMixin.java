@@ -41,6 +41,6 @@ public class PerWorldLearnMixin {
         if (pat == null || !pat.isPerWorld())
             return;
 
-        pat.setPerWorldSig(angles);
+        PatternEntries.INSTANCE.setPerWorldSig(pat, angles);
     }
 }

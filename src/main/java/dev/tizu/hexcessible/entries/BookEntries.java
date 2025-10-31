@@ -26,7 +26,7 @@ public class BookEntries {
     public static final Identifier BOOKID = Identifier.of("hexcasting", "thehexbook");
     public static final BookEntries INSTANCE = new BookEntries();
 
-    private List<Entry> entries = List.of();
+    private Map<String, List<Entry>> entries = Map.of();
     private Map<String, Supplier<Boolean>> locked = Map.of();
 
     private BookEntries() {
@@ -40,7 +40,7 @@ public class BookEntries {
             return;
         }
 
-        var entries = new ArrayList<Entry>();
+        var entries = new HashMap<String, List<Entry>>();
         var locked = new HashMap<String, Supplier<Boolean>>();
         book.getContents().entries.forEach((entryid, entry) -> {
             var pagei = new AtomicInteger(0);
@@ -58,8 +58,9 @@ public class BookEntries {
                             var desc = JsonHelper.getString(root, "text", "");
                             var in = JsonHelper.getString(root, "input", "");
                             var out = JsonHelper.getString(root, "output", "");
-                            entries.add(new Entry(id, entryid, desc, in, out,
-                                    pagei.getAndIncrement()));
+                            entries.computeIfAbsent(id, k -> new ArrayList<>())
+                                    .add(new Entry(id, entryid, desc, in, out,
+                                            pagei.getAndIncrement()));
                             break;
                     }
                 } catch (JsonSyntaxException e) {
@@ -85,12 +86,7 @@ public class BookEntries {
     }
 
     public List<Entry> get(Identifier id) {
-        var list = new ArrayList<Entry>();
-        entries.forEach(e -> {
-            if (e.id.equals(id.toString()))
-                list.add(e);
-        });
-        return list;
+        return entries.getOrDefault(id.toString(), List.of());
     }
 
     public boolean isLocked(String id) {
@@ -99,9 +95,6 @@ public class BookEntries {
 
     @Nullable
     public Entry getBookEntryFor(String id) {
-        return entries.stream()
-                .filter(e -> e.id.equals(id))
-                .findFirst()
-                .orElse(null);
+        return entries.getOrDefault(id, List.of()).stream().findFirst().orElse(null);
     }
 }
