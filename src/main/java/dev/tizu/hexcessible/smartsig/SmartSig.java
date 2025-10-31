@@ -15,6 +15,14 @@ public interface SmartSig {
     @Nullable
     PatternEntries.Entry get(List<HexAngle> sig);
 
+    public interface Conditional extends SmartSig {
+        /**
+         * Return true if this SmartSig is enabled, e.g. if it is added by a specific
+         * mod, the mod that provides it is installed. Will be run once, on init.
+         */
+        boolean enabled();
+    }
+
     public static class SmartSigRegistry {
         private SmartSigRegistry() {
         }
@@ -22,6 +30,8 @@ public interface SmartSig {
         private static final List<SmartSig> REGISTRY = new ArrayList<>();
 
         static void register(SmartSig sig) {
+            if (sig instanceof Conditional cond && !cond.enabled())
+                return;
             REGISTRY.add(sig);
         }
 
