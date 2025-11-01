@@ -29,7 +29,7 @@ public class OverevalSekhmet implements SmartSig.Conditional {
             return null;
         }
 
-        if (preserve < 0)
+        if (preserve < 0 || preserve > 16)
             return null;
 
         return List.of(getEntry(preserve));

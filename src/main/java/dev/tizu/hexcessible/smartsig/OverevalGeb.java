@@ -29,7 +29,7 @@ public class OverevalGeb implements SmartSig.Conditional {
             return null;
         }
 
-        if (amount <= 0)
+        if (amount <= 0 || amount > 16)
             return null;
 
         return List.of(getEntry(amount));

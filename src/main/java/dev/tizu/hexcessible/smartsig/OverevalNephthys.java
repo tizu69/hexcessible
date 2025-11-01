@@ -29,7 +29,7 @@ public class OverevalNephthys implements SmartSig.Conditional {
             return null;
         }
 
-        if (depth <= 0)
+        if (depth <= 0 || depth > 16)
             return null;
 
         return List.of(getEntry(depth));
