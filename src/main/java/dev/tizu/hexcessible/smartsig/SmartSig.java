@@ -6,6 +6,7 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import at.petrak.hexcasting.api.casting.math.HexAngle;
+import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.entries.PatternEntries;
 
 public interface SmartSig {
@@ -30,8 +31,12 @@ public interface SmartSig {
         private static final List<SmartSig> REGISTRY = new ArrayList<>();
 
         static void register(SmartSig sig) {
-            if (sig instanceof Conditional cond && !cond.enabled())
+            var name = sig.getClass().getSimpleName();
+            if (sig instanceof Conditional cond && !cond.enabled()) {
+                Hexcessible.LOGGER.warn("SmartSig requirements not met: {}", name);
                 return;
+            }
+            Hexcessible.LOGGER.info("Registered SmartSig: {}", name);
             REGISTRY.add(sig);
         }
 
@@ -58,6 +63,10 @@ public interface SmartSig {
             register(new Number());
             register(new Bookkeeper());
             register(new Escape());
+            register(new OverevalNephthys());
+            register(new OverevalGeb());
+            register(new OverevalNut());
+            register(new OverevalSekhmet());
         }
     }
 }
