@@ -100,8 +100,8 @@ public class Bookkeeper implements SmartSig {
         for (var i = 0; i < target.size(); i++)
             representation.append(Boolean.TRUE.equals(target.get(i)) ? "v" : "-");
 
-        var i18nkey = Text.translatable("hexcessible.smartsig.bookkeeper",
-                target.size()).getString();
+        var i18nkey = Text.translatable("hexcasting.special.hexcasting:mask",
+                representation).getString();
         var doc = new BookEntries.Entry("hexcessible:bookkeeper", null,
                 getDesc(target), in.toString(), out.toString(), 0);
         return new PatternEntries.Entry(Identifier.of("hexcessible",

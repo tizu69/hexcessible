@@ -52,7 +52,8 @@ public class Number implements SmartSig {
 
     private PatternEntries.Entry getEntry(float target) {
         var sig = getFor(target);
-        var i18nkey = Text.translatable("hexcessible.smartsig.number").getString();
+        var i18nkey = Text.translatable("hexcasting.special.hexcasting:number",
+                target).getString();
         var doc = new BookEntries.Entry("hexcessible:number", null,
                 "(experimental)", "", String.valueOf(target), 0);
         return new PatternEntries.Entry(Identifier.of("hexcessible", "number/"

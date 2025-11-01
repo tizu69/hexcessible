@@ -6,8 +6,6 @@
     "hexcessible.no_draw_methods": "All methods of drawing are disabled. Please enable at least one to cast spells.",
     "hexcessible.world_specific_autocomplete": "This pattern is world-specific. Start casting with an Ancient Scroll in your offhand to learn it.",
 
-    "hexcessible.smartsig.number": "Constant Number",
-    "hexcessible.smartsig.bookkeeper": "Bookkeeper's Gambit (%s)",
     "hexcessible.smartsig.bookkeeper.prefix": "Based on your current stack, this will ",
     "hexcessible.smartsig.bookkeeper.drop": "drop %s iotas",
     "hexcessible.smartsig.bookkeeper.drop1": "drop one iota",
