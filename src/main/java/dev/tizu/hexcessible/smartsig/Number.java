@@ -107,8 +107,8 @@ public class Number implements SmartSig {
         }
 
         // for non-ints, try to express as a fraction and decompose
-        // -> multiply by small powers of 2 to make integer
-        for (int denom = 2; denom <= 32; denom *= 2) {
+        // -> multiply by small integers to make integer
+        for (int denom = 2; denom <= 32; denom++) {
             int numer = Math.round(target * denom);
             if (Math.abs(target - (float) numer / denom) < 0.001) {
                 var numerPatterns = decomposeInt(numer);
