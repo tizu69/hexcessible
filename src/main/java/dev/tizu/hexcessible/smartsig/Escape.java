@@ -24,7 +24,7 @@ public class Escape implements SmartSig {
                 Text.translatable(desc).getString(), "", "", 0);
         return new PatternEntries.Entry(Identifier.of("hexcessible", id),
                 Text.translatable("hexcessible.smartsig.escape." + id).getString(),
-                () -> false, dir, List.of(Utils.angle(sig)), List.of(doc));
+                () -> false, dir, List.of(Utils.angle(sig)), List.of(doc), 0);
     }
 
     @Override

@@ -74,6 +74,6 @@ public class OverevalNephthys implements SmartSig.Conditional {
                 null, desc, in.toString(), out.toString(), 0);
 
         return new PatternEntries.Entry(Identifier.of("hexcessible", "nephthys/" + depth),
-                i18nkey, () -> false, HexDir.SOUTH_EAST, List.of(angles), List.of(doc));
+                i18nkey, () -> false, HexDir.SOUTH_EAST, List.of(angles), List.of(doc), 0);
     }
 }

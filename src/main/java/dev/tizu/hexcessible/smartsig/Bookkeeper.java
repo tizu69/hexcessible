@@ -106,7 +106,7 @@ public class Bookkeeper implements SmartSig {
                 getDesc(target), in.toString(), out.toString(), 0);
         return new PatternEntries.Entry(Identifier.of("hexcessible",
                 "bookkeeper/" + representation), i18nkey, () -> false,
-                HexDir.EAST, List.of(angles), List.of(doc));
+                HexDir.EAST, List.of(angles), List.of(doc), 0);
     }
 
     private static String getDesc(List<Boolean> target) {

@@ -56,7 +56,7 @@ public class Number implements SmartSig {
         var doc = new BookEntries.Entry("hexcessible:number", null,
                 "(experimental)", "", String.valueOf(target), 0);
         return new PatternEntries.Entry(Identifier.of("hexcessible", "number/"
-                + target), i18nkey, () -> false, HexDir.EAST, sig, List.of(doc));
+                + target), i18nkey, () -> false, HexDir.EAST, sig, List.of(doc), 1);
     }
 
     private float getFor(List<HexAngle> sig) {

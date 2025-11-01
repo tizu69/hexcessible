@@ -13,7 +13,7 @@ public class Utils {
     private Utils() {
     }
 
-    public static int fuzzyScore(String query, String candidate) {
+    public static int fluffySearch(String query, String candidate) {
         if (query == null || candidate == null || query.isEmpty())
             return 0;
 

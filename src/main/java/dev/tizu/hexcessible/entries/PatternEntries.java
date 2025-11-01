@@ -51,7 +51,7 @@ public class PatternEntries {
             if (entry.get().isIn(HexTags.Actions.PER_WORLD_PATTERN))
                 perWorld.add(id);
 
-            entries.add(new Entry(id, name, checkLock, dir, sig, impls));
+            entries.add(new Entry(id, name, checkLock, dir, sig, impls, 0));
         });
 
         populatePerWorldCache();
@@ -88,9 +88,9 @@ public class PatternEntries {
 
         var result = new ArrayList<>(entries.stream()
                 .map(e -> {
-                    var score = 0;
-                    score += Utils.fuzzyScore(query, e.name) * 3; // important!
-                    score += Utils.fuzzyScore(query, e.id.toString()
+                    var score = e.z * 10_000; // base score based on z index
+                    score += Utils.fluffySearch(query, e.name) * 3; // important!
+                    score += Utils.fluffySearch(query, e.id.toString()
                             .replaceAll("[:_/]", " "));
                     return Map.entry(e, score);
                 }).filter(e -> e.getValue() > 0)
@@ -141,7 +141,7 @@ public class PatternEntries {
     }
 
     public static record Entry(Identifier id, String name, Supplier<Boolean> checkLock,
-            HexDir dir, List<List<HexAngle>> sig, List<BookEntries.Entry> impls) {
+            HexDir dir, List<List<HexAngle>> sig, List<BookEntries.Entry> impls, int z) {
         public boolean locked() {
             return checkLock.get();
         }

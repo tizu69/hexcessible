@@ -77,6 +77,6 @@ public class OverevalNut implements SmartSig.Conditional {
                 null, desc, in.toString(), out.toString(), 0);
 
         return new PatternEntries.Entry(Identifier.of("hexcessible", "nut/" + amount),
-                i18nkey, () -> false, HexDir.NORTH_EAST, List.of(angles), List.of(doc));
+                i18nkey, () -> false, HexDir.NORTH_EAST, List.of(angles), List.of(doc), 0);
     }
 }
