@@ -148,10 +148,11 @@ public class PatternEntries {
 
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            for (var s : sig)
-                sb.append("<").append(dir).append(",")
-                        .append(Utils.angle(s).toLowerCase())
-                        .append("> ");
+            if (Hexcessible.cfg().tooltipRenderSigs)
+                for (var s : sig)
+                    sb.append("<").append(dir).append(",")
+                            .append(Utils.angle(s).toLowerCase())
+                            .append("> ");
             sb.append(name);
             return sb.toString();
         }

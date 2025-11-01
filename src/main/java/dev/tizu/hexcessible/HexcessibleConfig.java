@@ -29,6 +29,8 @@ public class HexcessibleConfig implements ConfigData {
     public boolean keyDocs = false; // TODO: customizable keybind
     @ConfigEntry.Gui.Tooltip
     public boolean uppercaseSig = false;
+    @ConfigEntry.Gui.Tooltip
+    public boolean tooltipRenderSigs = true;
 
     @ConfigEntry.Gui.CollapsibleObject
     public Idle idle = new Idle();
