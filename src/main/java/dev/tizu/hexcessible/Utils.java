@@ -66,6 +66,7 @@ public class Utils {
             case 'w' -> HexAngle.FORWARD;
             case 'e' -> HexAngle.RIGHT;
             case 'a' -> HexAngle.LEFT_BACK;
+            case 's' -> HexAngle.BACK;
             case 'd' -> HexAngle.RIGHT_BACK;
             default -> throw new IllegalStateException(c + " invalid");
         };
