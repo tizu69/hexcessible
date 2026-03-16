@@ -30,7 +30,8 @@ public class HexcessibleConfig implements ConfigData {
     @ConfigEntry.Gui.Excluded
     public boolean showAllDots = false;
     @ConfigEntry.Gui.Tooltip
-    public boolean keyDocs = false; // TODO: customizable keybind
+    @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
+    public KeyDocs keyDocs = KeyDocs.IDLING; // TODO: customizable keybind
     @ConfigEntry.Gui.Tooltip
     public boolean uppercaseSig = false;
     @ConfigEntry.Gui.Tooltip
@@ -133,6 +134,15 @@ public class HexcessibleConfig implements ConfigData {
         @Override
         public @NotNull String getKey() {
             return "text.autoconfig.hexcessible.enum.tooltip." + this.name();
+        }
+    }
+    
+    public enum KeyDocs implements Translatable {
+        OFF, IDLING, ALWAYS;
+
+        @Override
+        public @NotNull String getKey() {
+            return "text.autoconfig.hexcessible.enum.keydocs." + this.name();
         }
     }
 

@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import dev.tizu.hexcessible.Hexcessible;
+import dev.tizu.hexcessible.HexcessibleConfig.KeyDocs;
 import dev.tizu.hexcessible.accessor.DrawStateMixinAccessor;
 import dev.tizu.hexcessible.drawstate.Idling;
 import dev.tizu.hexcessible.entries.BookEntries;
@@ -46,9 +47,10 @@ public class KeyDocsScreenMixin {
 
     @Inject(method = "keyPressed", at = @At("HEAD"), order = 999)
     void openHexbook(int keycode, int scancode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+    	if (Hexcessible.cfg().keyDocs == KeyDocs.OFF) return;
         if ((Object) this instanceof DrawStateMixinAccessor accessor
-                && accessor.state() instanceof Idling
-                && Hexcessible.cfg().keyDocs
+                && (Hexcessible.cfg().keyDocs == KeyDocs.ALWAYS
+                		|| accessor.state() instanceof Idling)
                 && keycode == GLFW.GLFW_KEY_N) {
             staffScreen = (GuiSpellcasting) (Object) this;
             var pos = accessor.getPatternAt((int) mousePos.x, (int) mousePos.y);
