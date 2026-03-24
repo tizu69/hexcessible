@@ -14,6 +14,8 @@ import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.HexcessibleConfig.KeyDocs;
 import dev.tizu.hexcessible.accessor.DrawStateMixinAccessor;
 import dev.tizu.hexcessible.drawstate.Idling;
+import dev.tizu.hexcessible.drawstate.KeyboardDrawing;
+import dev.tizu.hexcessible.drawstate.MouseDrawing;
 import dev.tizu.hexcessible.entries.BookEntries;
 import dev.tizu.hexcessible.entries.PatternEntries;
 import net.minecraft.client.MinecraftClient;
@@ -47,16 +49,19 @@ public class KeyDocsScreenMixin {
 
     @Inject(method = "keyPressed", at = @At("HEAD"), order = 999)
     void openHexbook(int keycode, int scancode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
-    	if (Hexcessible.cfg().keyDocs == KeyDocs.OFF) return;
-        if ((Object) this instanceof DrawStateMixinAccessor accessor
-                && (Hexcessible.cfg().keyDocs == KeyDocs.ALWAYS
-                		|| accessor.state() instanceof Idling)
-                && keycode == GLFW.GLFW_KEY_N) {
-            staffScreen = (GuiSpellcasting) (Object) this;
-            var pos = accessor.getPatternAt((int) mousePos.x, (int) mousePos.y);
-            if (!openHexbookEntry(pos, keycode, modifiers))
-                PatchouliAPI.get().openBookGUI(BookEntries.BOOKID);
-        }
+        if (Hexcessible.cfg().keyDocs == KeyDocs.OFF) return;
+        if (keycode != GLFW.GLFW_KEY_N) return;
+        if (!((Object) this instanceof DrawStateMixinAccessor accessor)) return;
+        var valid = Hexcessible.cfg().keyDocs == KeyDocs.ALWAYS
+                ? accessor.state() instanceof Idling
+                        || accessor.state() instanceof MouseDrawing
+                        || accessor.state() instanceof KeyboardDrawing
+                : accessor.state() instanceof Idling;
+        if (!valid) return;
+        staffScreen = (GuiSpellcasting) (Object) this;
+        var pos = accessor.getPatternAt((int) mousePos.x, (int) mousePos.y);
+        if (!openHexbookEntry(pos, keycode, modifiers))
+            PatchouliAPI.get().openBookGUI(BookEntries.BOOKID);
     }
 
     @Unique
