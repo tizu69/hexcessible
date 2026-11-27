@@ -12,6 +12,7 @@ import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
+import at.petrak.hexcasting.api.casting.math.HexSignature;
 import at.petrak.hexcasting.client.render.RenderLib;
 import dev.tizu.hexcessible.Hexcessible;
 import dev.tizu.hexcessible.HexcessibleConfig;
@@ -89,8 +90,10 @@ public final class KeyboardDrawing extends DrawState {
             return;
         }
 
+        var sigBuilder = new HexSignature.Builder(false);
+        for (var a : sig) sigBuilder.addAngle(a);
         var mutated = castref.findClosestAvailable(origin,
-                new HexPattern(originDir, sig));
+                new HexPattern(originDir, sigBuilder.build()));
         if (mutated == null) {
             start = null;
             startDir = null;
@@ -101,9 +104,11 @@ public final class KeyboardDrawing extends DrawState {
         start = mutated.coord();
         startDir = mutated.startDir();
 
-        var pat = new HexPattern(startDir, sig);
+        var sigBuilder2 = new HexSignature.Builder(false);
+        for (var a : sig) sigBuilder2.addAngle(a);
+        var pat = new HexPattern(startDir, sigBuilder2.build());
         end = Utils.finalPos(start, pat);
-        endDir = pat.finalDir();
+        endDir = Utils.finalDir(pat);
     }
 
     @Override
@@ -173,7 +178,9 @@ public final class KeyboardDrawing extends DrawState {
         recalculateNewAll();
         if (start == null)
             return;
-        castref.execute(new HexPattern(startDir, sig), start);
+        var sigBuilder = new HexSignature.Builder(false);
+        for (var a : sig) sigBuilder.addAngle(a);
+        castref.execute(new HexPattern(startDir, sigBuilder.build()), start);
         requestExit();
     }
 
@@ -226,7 +233,9 @@ public final class KeyboardDrawing extends DrawState {
         if (start == null || startDir == null)
             return;
         var mat = ctx.getMatrices().peek().getPositionMatrix();
-        var pat = new HexPattern(startDir, sig);
+        var sigBuilder = new HexSignature.Builder(false);
+        for (var a : sig) sigBuilder.addAngle(a);
+        var pat = new HexPattern(startDir, sigBuilder.build());
         var duplicates = RenderLib.findDupIndices(pat.positions());
 
         var points = new ArrayList<Vec2f>();
@@ -245,7 +254,7 @@ public final class KeyboardDrawing extends DrawState {
         var tr = MinecraftClient.getInstance().textRenderer;
         var endpx = castref.coordToPx(end);
         for (var angle : HexAngle.values()) {
-            var pos = end.plus(endDir.rotatedBy(angle));
+            var pos = end.plus(endDir.rotatedBy(angle).asDelta());
             var charstr = Hexcessible.cfg().keyboardDraw.relative
                     ? Utils.angle(angle)
                     : String.valueOf(Utils.absAngle(endDir.rotatedBy(angle)));
@@ -265,7 +274,9 @@ public final class KeyboardDrawing extends DrawState {
     private boolean canGo(@Nullable HexAngle angle) {
         if (angle == null || startDir == null)
             return false;
-        var pat = new HexPattern(this.startDir, new ArrayList<>(sig));
+        var sigBuilder = new HexSignature.Builder(false);
+        for (var a : sig) sigBuilder.addAngle(a);
+        var pat = new HexPattern(this.startDir, sigBuilder.build());
         return castref.isValidPatternAddition(pat, angle);
     }
 
