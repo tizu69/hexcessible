@@ -70,11 +70,12 @@ public class CastRef {
     }
 
     public boolean isValidPatternAddition(HexPattern pat, HexDir next) {
-        return Utils.canAppendDir(pat, next);
+        return new HexPattern(pat.getStartDir(), pat.getAngles())
+                .tryAppendDir(next);
     }
 
     public boolean isValidPatternAddition(HexPattern pat, HexAngle next) {
-        return Utils.canAppendAngle(pat, next);
+        return isValidPatternAddition(pat, pat.finalDir().rotatedBy(next));
     }
 
     public boolean isVisible(HexCoord coord) {
@@ -110,14 +111,14 @@ public class CastRef {
         queue.add(start);
         visited.add(start); // so that start doesn't get re-queued
 
-        var dirs = Utils.hexDirs(pat.getOrientation());
+        var dirs = Utils.hexDirs(pat.getStartDir());
         while (!queue.isEmpty()) {
             HexCoord current = queue.poll();
             for (HexDir startDir : dirs)
                 if (fits(current, pat, startDir))
                     return new PatternPlacement(current, startDir);
             for (HexDir dir : dirs) {
-                HexCoord next = current.plus(dir.asDelta());
+                HexCoord next = current.plus(dir);
                 if (visited.add(next))
                     queue.add(next);
             }
@@ -138,13 +139,13 @@ public class CastRef {
         HexCoord current = origin;
         HexDir dir = startDir;
 
-        current = current.plus(dir.asDelta());
+        current = current.plus(dir);
         if (isUsed(current))
             return false;
 
-        for (HexAngle angle : pat.getSignature()) {
+        for (HexAngle angle : pat.getAngles()) {
             dir = dir.rotatedBy(angle);
-            current = current.plus(dir.asDelta());
+            current = current.plus(dir);
             if (isUsed(current))
                 return false;
         }

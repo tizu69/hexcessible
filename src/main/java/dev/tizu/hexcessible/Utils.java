@@ -1,12 +1,12 @@
 package dev.tizu.hexcessible;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexCoord;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
-import at.petrak.hexcasting.api.casting.math.HexSignature;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.WorldSavePath;
 
@@ -40,47 +40,22 @@ public class Utils {
         return qi == q.length() ? score : 0;
     }
 
-    public static HexDir finalDir(HexPattern pattern) {
-        var dir = pattern.getOrientation();
-        for (var angle : pattern.getSignature()) dir = dir.rotatedBy(angle);
-        return dir;
-    }
-
-    public static boolean canAppendDir(HexPattern pattern, HexDir nextDir) {
-        try {
-            var builder = new HexSignature.Builder(true);
-            for (var a : pattern.getSignature()) builder.addAngle(a);
-            var fd = finalDir(pattern);
-            var needed = fd.angleFrom(nextDir);
-            builder.addAngle(needed);
-            builder.build();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public static boolean canAppendAngle(HexPattern pattern, HexAngle angle) {
-        return canAppendDir(pattern, finalDir(pattern).rotatedBy(angle));
-    }
-
     public static boolean isValidPattern(List<HexAngle> angles) {
-        try {
-            var builder = new HexSignature.Builder(true);
-            for (var angle : angles) builder.addAngle(angle);
-            builder.build();
-            return true;
-        } catch (Exception e) {
-            return false;
+        var pat = new HexPattern(HexDir.EAST, new ArrayList<>());
+        for (var angle : angles) {
+            var dir = pat.finalDir();
+            if (!pat.tryAppendDir(dir.rotatedBy(angle)))
+                return false;
         }
+        return true;
     }
 
     public static HexCoord finalPos(HexCoord start, HexPattern pattern) {
-        var dir = pattern.getOrientation();
-        start = start.plus(dir.asDelta());
-        for (var angle : pattern.getSignature()) {
+        var dir = pattern.getStartDir();
+        start = start.plus(dir);
+        for (var angle : pattern.getAngles()) {
             dir = dir.rotatedBy(angle);
-            start = start.plus(dir.asDelta());
+            start = start.plus(dir);
         }
         return start;
     }

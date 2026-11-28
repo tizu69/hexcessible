@@ -31,7 +31,8 @@ public class PerWorldLearnMixin {
 		if (scrollAction == null) return;
 
 		var angles = new ArrayList<HexAngle>();
-		for (var a : scrollData.getSignature()) angles.add(a);
+		var anglesB = scrollData.getAngles();
+		for (var i = 0; i < anglesB.size(); i++) angles.add(anglesB.get(i));
 
 		var pat = PatternEntries.INSTANCE.get()
 			.stream()

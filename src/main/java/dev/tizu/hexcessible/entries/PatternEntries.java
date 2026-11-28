@@ -47,11 +47,8 @@ public class PatternEntries {
 
             var name = Text.translatable(HexAPI.instance().getActionI18nKey(key)).getString();
             Supplier<Boolean> checkLock = () -> BookEntries.INSTANCE.isLocked(id.toString());
-            var dir = item.prototype().getOrientation();
-            var sigList = new ArrayList<HexAngle>();
-            for (var a : item.prototype().getSignature()) sigList.add(a);
-            List<List<HexAngle>> sig = new ArrayList<>();
-            sig.add(sigList);
+            var dir = item.prototype().getStartDir();
+            var sig = List.of(item.prototype().getAngles());
             var impls = BookEntries.INSTANCE.get(id);
 
             if (entry.get().isIn(HexTags.Actions.PER_WORLD_PATTERN))

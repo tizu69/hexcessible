@@ -1,7 +1,5 @@
 package dev.tizu.hexcessible.mixin;
 
-import java.util.ArrayList;
-
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -10,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 import at.petrak.hexcasting.client.gui.GuiSpellcasting;
 import dev.tizu.hexcessible.Hexcessible;
@@ -71,9 +68,7 @@ public class KeyDocsScreenMixin {
     boolean openHexbookEntry(HexPattern pat, int keycode, int modifiers) {
         if (pat == null)
             return false;
-        var angles = new ArrayList<HexAngle>();
-        for (var a : pat.getSignature()) angles.add(a);
-        var ptrn = PatternEntries.INSTANCE.getFromSig(angles);
+        var ptrn = PatternEntries.INSTANCE.getFromSig(pat.getAngles());
         if (ptrn == null)
             return false;
         var entry = BookEntries.INSTANCE.getBookEntryFor(ptrn.id().toString());

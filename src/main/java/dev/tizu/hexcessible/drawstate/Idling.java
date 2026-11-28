@@ -1,6 +1,5 @@
 package dev.tizu.hexcessible.drawstate;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +7,6 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import at.petrak.hexcasting.api.casting.math.HexAngle;
 import at.petrak.hexcasting.api.casting.math.HexDir;
 import at.petrak.hexcasting.api.casting.math.HexPattern;
 import dev.tizu.hexcessible.Hexcessible;
@@ -66,13 +64,9 @@ public final class Idling extends DrawState {
         } else if (hovered != hoveredOver) {
             hoveredOverStart = System.currentTimeMillis();
             hoveredOver = hovered;
-            var hovList = new ArrayList<HexAngle>();
-            for (var a : hovered.getSignature()) hovList.add(a);
-            hoveredOverEntry = PatternEntries.INSTANCE.getFromSig(hovList);
+            hoveredOverEntry = PatternEntries.INSTANCE.getFromSig(hovered.getAngles());
         } else if (hoveredOverStart + 500 < System.currentTimeMillis()) {
-            var hovList = new ArrayList<HexAngle>();
-            for (var a : hovered.getSignature()) hovList.add(a);
-            KeyboardDrawing.render(ctx, mx, my, hovList, false,
+            KeyboardDrawing.render(ctx, mx, my, hovered.getAngles(), false,
                     Hexcessible.cfg().idle.tooltip, 0);
         }
     }
