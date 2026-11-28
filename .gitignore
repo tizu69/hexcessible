@@ -29,9 +29,10 @@ bin/
 
 *.DS_Store
 
-# fabric
+# Runs
 
-run/
+fabric/runs/
+neoforge/run/
 
 # java
 

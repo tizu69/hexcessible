@@ -1,0 +1,64 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev'
+}
+
+repositories {
+    maven { url = "https://maven.blamejared.com/" }
+    maven { url = "https://maven.ladysnake.org/releases" }
+    maven { url = "https://maven.shedaniel.me/" }
+    maven { url = "https://maven.terraformersmc.com/releases" }
+    maven { url = 'https://maven.ladysnake.org/releases' }
+    maven { url = "https://maven.architectury.dev/" }
+    maven { url = "https://thedarkcolour.github.io/KotlinForForge/" }
+    maven { url = "https://maven.theillusivec4.top/" }
+}
+
+neoForge {
+    version = neoforge_version
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
+    }
+    runs {
+        configureEach {
+            systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
+            ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
+        }
+        client {
+            client()
+        }
+        data {
+            data()
+
+            // DataGen can be run by - "./gradlew :neoforge:runData" in Terminal.
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+
+        }
+        server {
+            server()
+        }
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+dependencies {
+    implementation "thedarkcolour:kotlinforforge-neoforge:$kotlinforforge_version"
+
+    implementation "me.shedaniel.cloth:cloth-config-neoforge:$cloth_config_version"
+    implementation "vazkii.patchouli:Patchouli:$minecraft_version-$patchouli_version-NEOFORGE"
+
+    runtimeOnly files("${rootProject.rootDir}/libs/paucal-$paucal_version+$minecraft_version-neoforge.jar")
+    implementation files("${rootProject.rootDir}/libs/hexcasting-neoforge-$minecraft_version-${hexcasting_version}.jar")
+
+    runtimeOnly "dev.architectury:architectury-neoforge:$architectury_version"
+    runtimeOnly "com.samsthenerd.inline:inline-neoforge:$minecraft_version-$inline_version"
+    runtimeOnly "com.illusivesoulworks.caelus:caelus-neoforge:$caelus_version"
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
