@@ -15,7 +15,7 @@ public interface SmartSig {
     @Nullable
     PatternEntries.Entry get(List<HexAngle> sig);
 
-    public interface Conditional extends SmartSig {
+    interface Conditional extends SmartSig {
         /**
          * Return true if this SmartSig is enabled, e.g. if it is added by a specific
          * mod, the mod that provides it is installed. Will be run once, on init.
@@ -23,13 +23,13 @@ public interface SmartSig {
         boolean enabled();
     }
 
-    public static class SmartSigRegistry {
+    class SmartSigRegistry {
         private SmartSigRegistry() {
         }
 
         private static final List<SmartSig> REGISTRY = new ArrayList<>();
 
-        static void register(SmartSig sig) {
+        public static void register(SmartSig sig) {
             var name = sig.getClass().getSimpleName();
             if (sig instanceof Conditional cond && !cond.enabled()) {
                 Hexcessible.LOGGER.warn("SmartSig requirements not met: {}", name);
@@ -62,13 +62,6 @@ public interface SmartSig {
             register(new Number());
             register(new Bookkeeper());
             register(new Escape());
-//            register(new OverevalNephthys());
-//            register(new OverevalGeb());
-//            register(new OverevalNut());
-//            register(new OverevalSekhmet());
-//            register(new HexicalMacro());
-//            register(new HexThingsPatience());
-//            register(new HexThingsIntrojection());
             // register(new ComplexhexLong());
         }
     }
